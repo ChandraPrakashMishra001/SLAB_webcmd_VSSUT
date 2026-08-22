@@ -174,6 +174,14 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       return { actionLog };
     }
 
+    // 9. Open Tab Helper
+    if (request.type === 'OPEN_TAB') {
+      if (request.url) {
+        chrome.tabs.create({ url: request.url });
+        return { success: true };
+      }
+    }
+
     return { error: 'Unknown message type' };
   };
 

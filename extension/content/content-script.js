@@ -897,10 +897,16 @@
       }
     } catch (err) {
       console.warn('[SLAB] Microphone permission prompt:', err);
+      try {
+        chrome.runtime.sendMessage({
+          type: 'OPEN_TAB',
+          url: chrome.runtime.getURL('permission.html')
+        });
+      } catch (e) {}
       showToast(
         '🎙️ Microphone Permission Required',
         'Action Needed',
-        'Please grant microphone permission to enable voice recognition.'
+        'Opening permission page to grant microphone access...'
       );
       return;
     }
