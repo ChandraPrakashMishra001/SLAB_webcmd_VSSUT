@@ -48,40 +48,58 @@ const DEFAULT_SETTINGS = {
 };
 
 chrome.runtime.onInstalled.addListener(async () => {
-  console.log('[SLAB Agent] Extension installed.');
-  const existing = await chrome.storage.local.get(['settings', 'skills']);
-  if (!existing.settings) {
-    await chrome.storage.local.set({ settings: DEFAULT_SETTINGS });
-  }
-  if (!existing.skills) {
-    await chrome.storage.local.set({ skills: DEFAULT_SKILLS });
+  console.log('[SLAB Agent] Extension installed/updated.');
+  try {
+    const existing = await chrome.storage.local.get(['settings', 'skills']);
+    if (!existing.settings) {
+      await chrome.storage.local.set({ settings: DEFAULT_SETTINGS });
+    }
+    if (!existing.skills) {
+      await chrome.storage.local.set({ skills: DEFAULT_SKILLS });
+    }
+  } catch (e) {
+    console.warn('[SLAB] Storage init warning:', e);
   }
 
-  // Create context menu
-  chrome.contextMenus.create({
-    id: 'slab-analyze-selection',
-    title: 'Analyze selection with SLAB Agent',
-    contexts: ['selection']
-  });
+  // Safe Context Menu Creation
+  try {
+    chrome.contextMenus.removeAll(() => {
+      chrome.contextMenus.create({
+        id: 'slab-analyze-selection',
+        title: 'Analyze selection with SLAB Agent',
+        contexts: ['selection']
+      });
 
-  chrome.contextMenus.create({
-    id: 'slab-read-page',
-    title: 'Summarize page with SLAB Voice Agent',
-    contexts: ['page']
-  });
+      chrome.contextMenus.create({
+        id: 'slab-read-page',
+        title: 'Summarize page with SLAB Voice Agent',
+        contexts: ['page']
+      });
+    });
+  } catch (e) {
+    console.warn('[SLAB] Context menu creation warning:', e);
+  }
 });
 
 chrome.contextMenus.onClicked.addListener(async (info, tab) => {
-  if (info.menuItemId === 'slab-analyze-selection' && info.selectionText) {
-    await chrome.storage.local.set({
-      pendingQuery: `Analyze this text: "${info.selectionText}"`
-    });
-    chrome.action.openPopup();
-  } else if (info.menuItemId === 'slab-read-page') {
-    await chrome.storage.local.set({
-      pendingQuery: 'Please read and summarize this page'
-    });
-    chrome.action.openPopup();
+  try {
+    if (info.menuItemId === 'slab-analyze-selection' && info.selectionText) {
+      await chrome.storage.local.set({
+        pendingQuery: `Analyze this text: "${info.selectionText}"`
+      });
+      if (chrome.action && chrome.action.openPopup) {
+        chrome.action.openPopup().catch(() => {});
+      }
+    } else if (info.menuItemId === 'slab-read-page') {
+      await chrome.storage.local.set({
+        pendingQuery: 'Please read and summarize this page'
+      });
+      if (chrome.action && chrome.action.openPopup) {
+        chrome.action.openPopup().catch(() => {});
+      }
+    }
+  } catch (e) {
+    console.warn('[SLAB] Context menu click handling error:', e);
   }
 });
 
@@ -90,21 +108,31 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === 'GET_ACTIVE_TAB') {
     chrome.tabs.query({ active: true, currentWindow: true }).then(([tab]) => {
       sendResponse({ tab });
-    });
+    }).catch(err => sendResponse({ error: err.message }));
     return true;
   }
   if (message.type === 'EXECUTE_NAVIGATION') {
     const { action, url, tabId } = message;
     if (action === 'open' || action === 'search') {
-      chrome.tabs.create({ url }).then(t => sendResponse({ success: true, tab: t }));
+      chrome.tabs.create({ url })
+        .then(t => sendResponse({ success: true, tab: t }))
+        .catch(err => sendResponse({ error: err.message }));
     } else if (action === 'navigate') {
-      chrome.tabs.update(tabId || undefined, { url }).then(t => sendResponse({ success: true, tab: t }));
+      chrome.tabs.update(tabId || undefined, { url })
+        .then(t => sendResponse({ success: true, tab: t }))
+        .catch(err => sendResponse({ error: err.message }));
     } else if (action === 'back') {
-      chrome.tabs.goBack(tabId || undefined).then(() => sendResponse({ success: true }));
+      chrome.tabs.goBack(tabId || undefined)
+        .then(() => sendResponse({ success: true }))
+        .catch(err => sendResponse({ error: err.message }));
     } else if (action === 'forward') {
-      chrome.tabs.goForward(tabId || undefined).then(() => sendResponse({ success: true }));
+      chrome.tabs.goForward(tabId || undefined)
+        .then(() => sendResponse({ success: true }))
+        .catch(err => sendResponse({ error: err.message }));
     } else if (action === 'reload') {
-      chrome.tabs.reload(tabId || undefined).then(() => sendResponse({ success: true }));
+      chrome.tabs.reload(tabId || undefined)
+        .then(() => sendResponse({ success: true }))
+        .catch(err => sendResponse({ error: err.message }));
     }
     return true;
   }

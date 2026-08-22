@@ -379,6 +379,17 @@ async function extractActivePageText() {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
     if (!tab || !tab.id) return null;
 
+    // Check for internal/restricted URLs
+    const url = tab.url || '';
+    if (url.startsWith('chrome://') || url.startsWith('edge://') || url.startsWith('about:') || url.startsWith('chrome-extension://') || url.startsWith('view-source:')) {
+      return {
+        title: tab.title || 'Browser Internal Page',
+        url: url,
+        text: 'This is a protected browser system page. Browser security policies prevent extensions from reading internal pages. You can test page analysis on any standard website (e.g. Wikipedia, GitHub, Hacker News, or documentation sites).',
+        length: 0
+      };
+    }
+
     const [result] = await chrome.scripting.executeScript({
       target: { tabId: tab.id },
       func: () => {
@@ -400,8 +411,13 @@ async function extractActivePageText() {
 
     return result ? result.result : null;
   } catch (err) {
-    console.warn('[SLAB] Page extraction error:', err);
-    return null;
+    console.warn('[SLAB] Page extraction notice:', err.message);
+    return {
+      title: activeTab?.title || 'Current Webpage',
+      url: activeTab?.url || '',
+      text: 'Webpage content could not be directly extracted due to page permissions. Running general SLAB browser agent analysis instead.',
+      length: 0
+    };
   }
 }
 
