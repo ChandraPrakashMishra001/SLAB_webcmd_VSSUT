@@ -43,7 +43,7 @@
         videoEl.playsInline = true;
         videoEl.muted = true;
         videoEl.style.display = 'none';
-        document.body.appendChild(videoEl);
+        (document.body || document.documentElement).appendChild(videoEl);
 
         await videoEl.play();
         isTracking = true;

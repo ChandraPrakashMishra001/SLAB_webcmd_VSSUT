@@ -15,13 +15,18 @@
   if (window.__SLAB_CONTENT_INITIALIZED__) return;
   window.__SLAB_CONTENT_INITIALIZED__ = true;
 
-  // 1. Access Control Check
-  const access = await chrome.runtime.sendMessage({
-    type: 'CHECK_ACCESS',
-    hostname: window.location.hostname
-  }).catch(() => ({ allowed: true, settings: {} }));
+  // 1. Access Control Check (Non-blocking)
+  let access = { allowed: true, settings: {} };
+  try {
+    access = await chrome.runtime.sendMessage({
+      type: 'CHECK_ACCESS',
+      hostname: window.location.hostname
+    });
+  } catch (e) {
+    access = { allowed: true, settings: {} };
+  }
 
-  if (!access.allowed) {
+  if (access && access.allowed === false) {
     console.log('[SLAB] Domain is restricted by access control policy:', window.location.hostname);
     return;
   }
@@ -841,7 +846,18 @@
     };
 
     recognition.onerror = (e) => {
-      console.warn('[SLAB Voice Content]', e.error);
+      console.warn('[SLAB Voice Content Error]', e.error);
+      if (e.error === 'not-allowed' || e.error === 'audio-capture') {
+        isVoiceActive = false;
+        orb.classList.remove('listening');
+        btnVoiceToggle.classList.remove('active');
+        transcriptPill.style.display = 'none';
+        showToast(
+          '🎙️ Microphone Permission Needed',
+          'Mic Access',
+          'Please allow microphone access in Chrome to enable hands-free voice commands.'
+        );
+      }
     };
 
     recognition.onend = () => {
@@ -855,19 +871,52 @@
     };
   }
 
-  function toggleVoice() {
-    if (!recognition) initVoice();
-    if (!recognition) return;
+  async function toggleVoice() {
+    const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRec) {
+      showToast('Voice Not Supported', 'Web Speech', 'Web Speech API is not supported in this browser.');
+      return;
+    }
 
     if (isVoiceActive) {
       isVoiceActive = false;
-      try { recognition.stop(); } catch (e) {}
+      if (recognition) {
+        try { recognition.stop(); } catch (e) {}
+      }
       orb.classList.remove('listening');
       btnVoiceToggle.classList.remove('active');
       transcriptPill.style.display = 'none';
-    } else {
+      return;
+    }
+
+    // Pre-flight microphone permission check
+    try {
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        stream.getTracks().forEach(track => track.stop());
+      }
+    } catch (err) {
+      console.warn('[SLAB] Microphone permission prompt:', err);
+      showToast(
+        '🎙️ Microphone Permission Required',
+        'Action Needed',
+        'Please grant microphone permission to enable voice recognition.'
+      );
+      return;
+    }
+
+    if (!recognition) initVoice();
+    if (recognition) {
       isVoiceActive = true;
-      try { recognition.start(); } catch (e) {}
+      try { 
+        recognition.start(); 
+        orb.classList.add('listening');
+        btnVoiceToggle.classList.add('active');
+        transcriptPill.style.display = 'block';
+        transcriptPill.textContent = 'Listening for commands...';
+      } catch (e) {
+        console.warn('Recognition start exception:', e);
+      }
     }
   }
 
