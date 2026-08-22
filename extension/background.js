@@ -62,46 +62,54 @@ chrome.runtime.onInstalled.addListener(async () => {
   }
 
   // Safe Context Menu Creation
-  try {
-    chrome.contextMenus.removeAll(() => {
-      chrome.contextMenus.create({
-        id: 'slab-analyze-selection',
-        title: 'Analyze selection with SLAB Agent',
-        contexts: ['selection']
-      });
+  if (chrome.contextMenus && typeof chrome.contextMenus.removeAll === 'function') {
+    try {
+      chrome.contextMenus.removeAll(() => {
+        try {
+          chrome.contextMenus.create({
+            id: 'slab-analyze-selection',
+            title: 'Analyze selection with SLAB Agent',
+            contexts: ['selection']
+          });
 
-      chrome.contextMenus.create({
-        id: 'slab-read-page',
-        title: 'Summarize page with SLAB Voice Agent',
-        contexts: ['page']
+          chrome.contextMenus.create({
+            id: 'slab-read-page',
+            title: 'Summarize page with SLAB Voice Agent',
+            contexts: ['page']
+          });
+        } catch (err) {
+          console.warn('[SLAB] contextMenus.create error:', err);
+        }
       });
-    });
-  } catch (e) {
-    console.warn('[SLAB] Context menu creation warning:', e);
-  }
-});
-
-chrome.contextMenus.onClicked.addListener(async (info, tab) => {
-  try {
-    if (info.menuItemId === 'slab-analyze-selection' && info.selectionText) {
-      await chrome.storage.local.set({
-        pendingQuery: `Analyze this text: "${info.selectionText}"`
-      });
-      if (chrome.action && chrome.action.openPopup) {
-        chrome.action.openPopup().catch(() => {});
-      }
-    } else if (info.menuItemId === 'slab-read-page') {
-      await chrome.storage.local.set({
-        pendingQuery: 'Please read and summarize this page'
-      });
-      if (chrome.action && chrome.action.openPopup) {
-        chrome.action.openPopup().catch(() => {});
-      }
+    } catch (e) {
+      console.warn('[SLAB] contextMenus error:', e);
     }
-  } catch (e) {
-    console.warn('[SLAB] Context menu click handling error:', e);
   }
 });
+
+if (chrome.contextMenus && chrome.contextMenus.onClicked) {
+  chrome.contextMenus.onClicked.addListener(async (info, tab) => {
+    try {
+      if (info.menuItemId === 'slab-analyze-selection' && info.selectionText) {
+        await chrome.storage.local.set({
+          pendingQuery: `Analyze this text: "${info.selectionText}"`
+        });
+        if (chrome.action && typeof chrome.action.openPopup === 'function') {
+          chrome.action.openPopup().catch(() => {});
+        }
+      } else if (info.menuItemId === 'slab-read-page') {
+        await chrome.storage.local.set({
+          pendingQuery: 'Please read and summarize this page'
+        });
+        if (chrome.action && typeof chrome.action.openPopup === 'function') {
+          chrome.action.openPopup().catch(() => {});
+        }
+      }
+    } catch (e) {
+      console.warn('[SLAB] Context menu click handling error:', e);
+    }
+  });
+}
 
 // Messaging bus
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
