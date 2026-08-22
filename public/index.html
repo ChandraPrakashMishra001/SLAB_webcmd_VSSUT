@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en" class="dark" style="scroll-behavior: smooth;">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SLAB — Voice & AI Browser Agents with Webcmd</title>
+  <title>SLAB — Autonomous Voice & AI Browser Agents</title>
 
   <!-- Google Fonts: Orbitron, Space Grotesk, JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -16,8 +16,10 @@
   <style>
     :root {
       --bg-black: #000000;
-      --bg-card: rgba(15, 15, 15, 0.75);
+      --bg-card: rgba(15, 15, 18, 0.75);
+      --bg-card-hover: rgba(22, 22, 28, 0.9);
       --border-glass: rgba(255, 255, 255, 0.12);
+      --border-glow: rgba(56, 189, 248, 0.4);
       --accent-cyan: #38bdf8;
       --accent-blue: #3b82f6;
       --accent-purple: #a855f7;
@@ -37,23 +39,26 @@
       color: var(--text-white);
       font-family: var(--font-body);
       min-height: 100vh;
-      line-height: 1.5;
+      line-height: 1.6;
       overflow-x: hidden;
-      background-image: 
-        radial-gradient(circle at 50% 0%, rgba(56, 189, 248, 0.12) 0%, transparent 50%),
-        radial-gradient(circle at 10% 30%, rgba(168, 85, 247, 0.08) 0%, transparent 40%),
-        radial-gradient(circle at 90% 70%, rgba(16, 185, 129, 0.06) 0%, transparent 40%);
-      background-attachment: fixed;
     }
 
+    /* Shimmering Chrome Typography */
     .text-chrome {
-      background: linear-gradient(135deg, #ffffff 0%, #b3b3b3 25%, #404040 45%, #e6e6e6 55%, #ffffff 100%);
+      background: linear-gradient(
+        135deg,
+        #ffffff 0%,
+        #d1d5db 25%,
+        #374151 45%,
+        #e5e7eb 55%,
+        #ffffff 100%
+      );
       background-size: 300% auto;
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
       animation: chrome-shimmer 6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-      filter: drop-shadow(0px 4px 16px rgba(255, 255, 255, 0.2));
+      filter: drop-shadow(0px 4px 20px rgba(255, 255, 255, 0.25));
     }
 
     @keyframes chrome-shimmer {
@@ -62,27 +67,33 @@
       100% { background-position: 0% center; }
     }
 
+    /* Floating Liquid Glass Navbar */
     .glass-liquid-nav {
-      backdrop-filter: blur(20px) saturate(140%);
-      -webkit-backdrop-filter: blur(20px) saturate(140%);
-      background: linear-gradient(to bottom, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 40%, rgba(0, 0, 0, 0.4) 100%);
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      backdrop-filter: blur(24px) saturate(140%);
+      -webkit-backdrop-filter: blur(24px) saturate(140%);
+      background: linear-gradient(
+        to bottom, 
+        rgba(255, 255, 255, 0.09) 0%, 
+        rgba(255, 255, 255, 0.02) 40%, 
+        rgba(0, 0, 0, 0.6) 100%
+      );
       border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-      border-left: 1px solid rgba(255, 255, 255, 0.15);
-      border-right: 1px solid rgba(255, 255, 255, 0.15);
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), inset 0 1px 2px rgba(255, 255, 255, 0.3);
-      position: relative;
-      z-index: 50;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), inset 0 1px 2px rgba(255, 255, 255, 0.2);
     }
 
     .nav-container {
       max-width: 1300px;
       margin: 0 auto;
-      height: 76px;
+      height: 72px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       padding: 0 2rem;
-      border-radius: 0 0 24px 24px;
     }
 
     .brand-logo {
@@ -113,7 +124,6 @@
     }
 
     .brand-badge {
-      font-family: var(--font-body);
       font-size: 0.7rem;
       font-weight: 700;
       padding: 2px 6px;
@@ -124,326 +134,393 @@
       margin-left: 0.4rem;
     }
 
-    .nav-links { display: flex; align-items: center; gap: 1.25rem; }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 1.75rem;
+    }
+
     .nav-btn {
-      font-size: 0.85rem;
+      font-size: 0.9rem;
       font-weight: 600;
       color: var(--text-muted);
       text-decoration: none;
       transition: color 0.2s ease;
-      display: flex;
-      align-items: center;
-      gap: 0.4rem;
     }
     .nav-btn:hover { color: var(--accent-cyan); }
 
     .btn-liquid-nav {
       background: linear-gradient(135deg, rgba(56, 189, 248, 0.2), rgba(168, 85, 247, 0.2));
-      border: 1px solid rgba(255, 255, 255, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.25);
       color: #fff;
-      padding: 0.5rem 1rem;
+      padding: 0.5rem 1.2rem;
       border-radius: 20px;
       font-size: 0.85rem;
-      font-weight: 600;
+      font-weight: 700;
       text-decoration: none;
       backdrop-filter: blur(8px);
-      box-shadow: 0 0 15px rgba(56, 189, 248, 0.25);
+      box-shadow: 0 0 20px rgba(56, 189, 248, 0.25);
       transition: all 0.25s ease;
     }
     .btn-liquid-nav:hover {
       background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
       border-color: #fff;
       transform: translateY(-2px);
-      box-shadow: 0 0 25px rgba(56, 189, 248, 0.6);
+      box-shadow: 0 0 30px rgba(56, 189, 248, 0.6);
     }
 
-    .hero-section {
+    /* ══════════════════════════════════════════════════════════════════════════
+       SECTION 1: IMMERSIVE 100VH SHADER ANIMATION LANDING PAGE
+       ══════════════════════════════════════════════════════════════════════════ */
+    .section-hero {
       position: relative;
-      max-width: 1200px;
-      margin: 1.5rem auto 2rem;
+      width: 100%;
+      height: 100vh;
+      min-height: 720px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       text-align: center;
-      padding: 3rem 1.5rem 2rem;
-      border-radius: 24px;
+      padding: 5rem 1.5rem 2rem;
       overflow: hidden;
     }
 
-    /* Three.js Shader Canvas Container */
-    #shaderAnimationBg {
+    #shaderAnimationCanvas {
       position: absolute;
       inset: 0;
       width: 100%;
       height: 100%;
-      z-index: 0;
+      z-index: 1;
       pointer-events: none;
-      opacity: 0.75;
+      opacity: 0.85;
       mix-blend-mode: screen;
     }
 
     .hero-content {
       position: relative;
-      z-index: 2;
+      z-index: 10;
+      max-width: 960px;
+      margin: 0 auto;
     }
 
     .university-badge {
       display: inline-flex;
       align-items: center;
       gap: 0.5rem;
-      padding: 0.4rem 1rem;
+      padding: 0.45rem 1.2rem;
       border-radius: 30px;
-      background: rgba(0, 0, 0, 0.6);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      font-size: 0.8rem;
-      font-weight: 600;
+      background: rgba(0, 0, 0, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      font-size: 0.85rem;
+      font-weight: 700;
       letter-spacing: 0.12em;
       color: var(--accent-cyan);
-      margin-bottom: 1.25rem;
-      backdrop-filter: blur(12px);
+      margin-bottom: 1.5rem;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 0 20px rgba(56, 189, 248, 0.2);
     }
 
     .hero-title {
       font-family: var(--font-display);
-      font-size: 3.8rem;
+      font-size: 4.2rem;
       font-weight: 900;
       letter-spacing: 0.04em;
-      line-height: 1.1;
-      margin-bottom: 0.8rem;
+      line-height: 1.08;
+      margin-bottom: 1.2rem;
     }
 
     .hero-subtitle {
-      font-family: var(--font-body);
-      font-size: 1.25rem;
-      color: var(--text-muted);
-      max-width: 760px;
-      margin: 0 auto 2rem;
-    }
-
-    .extension-hero-card {
-      max-width: 900px;
-      margin: 2rem auto 0;
-      background: linear-gradient(135deg, rgba(20, 25, 40, 0.85) 0%, rgba(10, 10, 18, 0.95) 100%);
-      border: 1px solid rgba(56, 189, 248, 0.35);
-      border-radius: 20px;
-      padding: 1.5rem 2rem;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 2rem;
-      backdrop-filter: blur(24px);
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 30px rgba(56, 189, 248, 0.15);
-      text-align: left;
-    }
-
-    .callout-info { flex: 1; }
-    .badge-pill {
-      font-size: 0.75rem;
-      font-weight: 700;
-      padding: 2px 8px;
-      border-radius: 6px;
-      background: rgba(16, 185, 129, 0.2);
-      color: var(--accent-emerald);
-      border: 1px solid rgba(16, 185, 129, 0.4);
-      display: inline-block;
-      margin-bottom: 0.5rem;
-    }
-    .callout-heading {
-      font-family: var(--font-display);
       font-size: 1.35rem;
-      font-weight: 800;
-      color: #fff;
+      color: #e2e8f0;
+      max-width: 780px;
+      margin: 0 auto 2.5rem;
+      font-weight: 400;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
     }
-    .callout-sub { font-size: 0.9rem; color: var(--text-muted); margin-top: 0.3rem; }
 
-    .btn-download-glow {
+    .hero-cta-group {
+      display: flex;
+      gap: 1.25rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 2.5rem;
+    }
+
+    .btn-cta-primary {
       background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
       color: #fff;
       text-decoration: none;
-      font-weight: 700;
-      font-size: 1rem;
-      padding: 0.9rem 1.6rem;
-      border-radius: 12px;
+      font-weight: 800;
+      font-size: 1.05rem;
+      padding: 1rem 2rem;
+      border-radius: 14px;
       display: inline-flex;
       align-items: center;
       gap: 0.6rem;
-      white-space: nowrap;
-      box-shadow: 0 0 25px rgba(56, 189, 248, 0.4);
+      box-shadow: 0 0 35px rgba(56, 189, 248, 0.5);
       transition: all 0.25s ease;
-      border: 1px solid rgba(255, 255, 255, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.4);
     }
-    .btn-download-glow:hover {
-      transform: translateY(-3px) scale(1.02);
-      box-shadow: 0 0 40px rgba(168, 85, 247, 0.7);
+    .btn-cta-primary:hover {
+      transform: translateY(-3px) scale(1.03);
+      box-shadow: 0 0 50px rgba(168, 85, 247, 0.8);
     }
 
-    .main-container {
+    .btn-cta-secondary {
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      color: #fff;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 1.05rem;
+      padding: 1rem 1.8rem;
+      border-radius: 14px;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      backdrop-filter: blur(12px);
+      transition: all 0.25s ease;
+    }
+    .btn-cta-secondary:hover {
+      background: rgba(30, 41, 59, 0.9);
+      border-color: var(--accent-cyan);
+      transform: translateY(-3px);
+    }
+
+    .scroll-indicator {
+      position: absolute;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.4rem;
+      animation: bounce 2s infinite;
+    }
+    @keyframes bounce {
+      0%, 20%, 50%, 80%, 100% { transform: translate(-50%, 0); }
+      40% { transform: translate(-50%, -8px); }
+      60% { transform: translate(-50%, -4px); }
+    }
+
+    /* ══════════════════════════════════════════════════════════════════════════
+       SECTION CONTAINERS & HEADINGS
+       ══════════════════════════════════════════════════════════════════════════ */
+    .section-wrap {
       max-width: 1200px;
       margin: 0 auto;
-      padding: 0 1.5rem 4rem;
+      padding: 5rem 1.5rem;
+      position: relative;
     }
 
-    .problem-glass-banner {
-      background: rgba(15, 23, 42, 0.6);
-      border: 1px solid rgba(56, 189, 248, 0.2);
-      border-radius: 16px;
-      padding: 1.25rem 1.75rem;
-      margin-bottom: 2rem;
+    .section-heading-box {
+      text-align: center;
+      margin-bottom: 3.5rem;
+    }
+
+    .section-tag {
+      font-family: var(--font-display);
+      font-size: 0.8rem;
+      font-weight: 800;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--accent-cyan);
+      margin-bottom: 0.5rem;
+    }
+
+    .section-title {
+      font-family: var(--font-display);
+      font-size: 2.4rem;
+      font-weight: 900;
+      letter-spacing: 0.03em;
+      color: #fff;
+      margin-bottom: 0.8rem;
+    }
+
+    .section-sub {
+      font-size: 1.05rem;
+      color: var(--text-muted);
+      max-width: 680px;
+      margin: 0 auto;
+    }
+
+    /* ══════════════════════════════════════════════════════════════════════════
+       SECTION 2: PROBLEM STATEMENT & ENTRY
+       ══════════════════════════════════════════════════════════════════════════ */
+    .problem-glass-card {
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.7) 0%, rgba(10, 15, 30, 0.9) 100%);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      border-radius: 20px;
+      padding: 2rem;
       display: flex;
       align-items: center;
-      gap: 1.25rem;
-      backdrop-filter: blur(16px);
+      gap: 1.75rem;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+      margin-bottom: 2rem;
     }
 
-    .problem-icon-wrap {
-      width: 44px;
-      height: 44px;
-      border-radius: 12px;
+    .problem-icon-box {
+      width: 56px;
+      height: 56px;
+      border-radius: 16px;
       background: rgba(16, 185, 129, 0.15);
-      border: 1px solid rgba(16, 185, 129, 0.3);
+      border: 1px solid rgba(16, 185, 129, 0.35);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.5rem;
+      font-size: 1.8rem;
       flex-shrink: 0;
     }
 
-    .problem-label { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent-emerald); }
-    .problem-text { font-size: 0.95rem; color: #e2e8f0; margin-top: 0.2rem; }
+    .requirements-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+    }
 
-    .loop-grid {
+    .req-box {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-glass);
+      border-radius: 12px;
+      padding: 1rem 1.25rem;
+      font-size: 0.9rem;
+      color: #cbd5e1;
+    }
+    .req-box strong { color: #fff; }
+
+    /* ══════════════════════════════════════════════════════════════════════════
+       SECTION 3: 4-LAYER SLAB ARCHITECTURE
+       ══════════════════════════════════════════════════════════════════════════ */
+    .pyramid-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       gap: 1.25rem;
-      margin-bottom: 2.5rem;
     }
-    .loop-card {
+
+    .layer-card {
       background: var(--bg-card);
       border: 1px solid var(--border-glass);
-      border-radius: 16px;
-      padding: 1.25rem;
+      border-radius: 18px;
+      padding: 1.5rem;
+      position: relative;
       transition: all 0.25s ease;
-      backdrop-filter: blur(12px);
+      backdrop-filter: blur(16px);
     }
-    .loop-card:hover {
+    .layer-card:hover {
       border-color: var(--accent-cyan);
-      transform: translateY(-4px);
-      box-shadow: 0 0 20px rgba(56, 189, 248, 0.2);
+      transform: translateY(-6px);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6), 0 0 25px rgba(56, 189, 248, 0.25);
     }
-    .loop-layer-tag { font-family: var(--font-display); font-size: 0.7rem; font-weight: 800; color: var(--accent-cyan); margin-bottom: 0.4rem; }
-    .loop-title { font-family: var(--font-display); font-size: 1.15rem; font-weight: 700; color: #fff; margin-bottom: 0.4rem; }
-    .loop-desc { font-size: 0.85rem; color: var(--text-muted); line-height: 1.45; }
 
-    .tabs-header {
-      display: flex;
-      gap: 0.75rem;
-      border-bottom: 1px solid var(--border-glass);
-      margin-bottom: 1.75rem;
-      overflow-x: auto;
+    .layer-badge {
+      font-family: var(--font-display);
+      font-size: 0.75rem;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      color: var(--accent-cyan);
+      margin-bottom: 0.5rem;
     }
-    .tab-item {
-      background: transparent;
-      border: none;
-      border-bottom: 2px solid transparent;
-      padding: 0.85rem 1.4rem;
-      font-size: 0.95rem;
-      font-weight: 600;
-      color: var(--text-muted);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      margin-bottom: -1px;
-      transition: all 0.2s ease;
-      white-space: nowrap;
-    }
-    .tab-item:hover { color: #fff; }
-    .tab-item.active { color: var(--accent-cyan); border-bottom-color: var(--accent-cyan); }
 
-    .tab-panel { display: none; }
-    .tab-panel.active { display: block; animation: panelFade 0.25s ease-out; }
-    @keyframes panelFade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
-
-    .glass-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border-glass);
-      border-radius: 20px;
-      padding: 1.75rem;
-      margin-bottom: 1.5rem;
-      backdrop-filter: blur(20px);
-    }
-    .card-heading {
+    .layer-heading {
       font-family: var(--font-display);
       font-size: 1.25rem;
       font-weight: 700;
-      margin-bottom: 1rem;
-      display: flex;
-      align-items: center;
-      gap: 0.6rem;
       color: #fff;
+      margin-bottom: 0.5rem;
     }
 
-    .voice-dock {
+    .layer-body {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    /* ══════════════════════════════════════════════════════════════════════════
+       SECTION 4: LIVE VOICE & BROWSER AGENT ARENA
+       ══════════════════════════════════════════════════════════════════════════ */
+    .agent-arena-card {
+      background: linear-gradient(180deg, rgba(15, 20, 35, 0.85) 0%, rgba(8, 10, 18, 0.95) 100%);
+      border: 1px solid var(--border-glow);
+      border-radius: 24px;
+      padding: 2.5rem;
+      backdrop-filter: blur(24px);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 40px rgba(56, 189, 248, 0.15);
+    }
+
+    .voice-interactive-dock {
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       padding: 2rem;
-      background: rgba(0, 0, 0, 0.5);
+      background: rgba(0, 0, 0, 0.6);
       border: 1px dashed rgba(255, 255, 255, 0.15);
-      border-radius: 16px;
-      margin-bottom: 1.25rem;
+      border-radius: 20px;
+      margin-bottom: 1.5rem;
     }
 
-    .mic-button-big {
-      width: 80px;
-      height: 80px;
+    .mic-btn-main {
+      width: 86px;
+      height: 86px;
       border-radius: 50%;
       background: linear-gradient(135deg, #1e293b, #0f172a);
       border: 2px solid var(--accent-cyan);
       color: #fff;
-      font-size: 2.2rem;
+      font-size: 2.4rem;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
       transition: all 0.25s ease;
-      box-shadow: 0 0 25px rgba(56, 189, 248, 0.3);
+      box-shadow: 0 0 30px rgba(56, 189, 248, 0.35);
     }
-    .mic-button-big:hover { transform: scale(1.08); box-shadow: 0 0 35px rgba(56, 189, 248, 0.6); }
-    .mic-button-big.recording {
+    .mic-btn-main:hover {
+      transform: scale(1.08);
+      box-shadow: 0 0 45px rgba(56, 189, 248, 0.7);
+    }
+    .mic-btn-main.recording {
       background: var(--accent-rose);
       border-color: #fff;
-      box-shadow: 0 0 40px var(--accent-rose);
+      box-shadow: 0 0 50px var(--accent-rose);
       animation: micPulse 1.2s infinite;
     }
-    @keyframes micPulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
 
-    .chat-display {
-      min-height: 240px;
-      max-height: 480px;
+    .chat-stream-box {
+      min-height: 260px;
+      max-height: 520px;
       overflow-y: auto;
-      background: #050811;
+      background: #030712;
       border: 1px solid var(--border-glass);
-      border-radius: 12px;
-      padding: 1.25rem;
+      border-radius: 16px;
+      padding: 1.5rem;
       display: flex;
       flex-direction: column;
-      gap: 1rem;
-      margin-bottom: 1rem;
+      gap: 1.1rem;
+      margin-bottom: 1.25rem;
     }
 
-    .chat-msg {
-      padding: 0.85rem 1.1rem;
-      border-radius: 12px;
-      font-size: 0.92rem;
+    .bubble-msg {
+      padding: 0.9rem 1.2rem;
+      border-radius: 14px;
+      font-size: 0.95rem;
       max-width: 90%;
       line-height: 1.5;
     }
-    .chat-msg.user {
+    .bubble-msg.user {
       align-self: flex-end;
       background: #1e3a8a;
       color: #fff;
-      border: 1px solid rgba(56, 189, 248, 0.3);
+      border: 1px solid rgba(56, 189, 248, 0.4);
     }
-    .chat-msg.agent {
+    .bubble-msg.agent {
       align-self: flex-start;
       background: rgba(17, 24, 39, 0.95);
       border: 1px solid var(--border-glass);
@@ -502,10 +579,10 @@
 
     textarea, input[type="text"], select {
       width: 100%;
-      background: #050811;
+      background: #030712;
       border: 1px solid rgba(255, 255, 255, 0.15);
-      border-radius: 10px;
-      padding: 0.85rem 1rem;
+      border-radius: 12px;
+      padding: 0.9rem 1.1rem;
       font-family: inherit;
       font-size: 0.95rem;
       color: #fff;
@@ -524,10 +601,10 @@
       align-items: center;
       justify-content: center;
       gap: 0.5rem;
-      padding: 0.75rem 1.4rem;
-      font-size: 0.9rem;
+      padding: 0.85rem 1.5rem;
+      font-size: 0.95rem;
       font-weight: 700;
-      border-radius: 10px;
+      border-radius: 12px;
       border: none;
       cursor: pointer;
       transition: all 0.2s ease;
@@ -536,6 +613,7 @@
     .btn-primary-action {
       background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
       color: #fff;
+      box-shadow: 0 0 20px rgba(56, 189, 248, 0.3);
     }
     .btn-primary-action:hover {
       transform: translateY(-2px);
@@ -550,6 +628,48 @@
       background: rgba(255, 255, 255, 0.12);
       color: #fff;
       border-color: var(--accent-cyan);
+    }
+
+    /* ══════════════════════════════════════════════════════════════════════════
+       SECTION 5: DEVELOPER TOOLKIT & TOOLS
+       ══════════════════════════════════════════════════════════════════════════ */
+    .tabs-nav {
+      display: flex;
+      gap: 0.75rem;
+      border-bottom: 1px solid var(--border-glass);
+      margin-bottom: 2rem;
+      overflow-x: auto;
+    }
+    .tab-trigger {
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid transparent;
+      padding: 0.9rem 1.5rem;
+      font-family: var(--font-body);
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: -1px;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+    .tab-trigger:hover { color: #fff; }
+    .tab-trigger.active { color: var(--accent-cyan); border-bottom-color: var(--accent-cyan); }
+
+    .tab-pane { display: none; }
+    .tab-pane.active { display: block; animation: paneFade 0.25s ease-out; }
+    @keyframes paneFade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+    .toolkit-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-glass);
+      border-radius: 20px;
+      padding: 2rem;
+      backdrop-filter: blur(20px);
     }
 
     .suggestions-wrapper { display: flex; flex-direction: column; gap: 0.75rem; margin-top: 1rem; }
@@ -608,46 +728,94 @@
     .filter-chip:hover { color: #fff; border-color: var(--accent-cyan); }
     .filter-chip.active { background: var(--accent-cyan); color: #000; border-color: var(--accent-cyan); }
 
+    /* ══════════════════════════════════════════════════════════════════════════
+       SECTION 6: CHROME EXTENSION DOWNLOAD & MCP
+       ══════════════════════════════════════════════════════════════════════════ */
+    .extension-showcase {
+      background: linear-gradient(135deg, rgba(20, 25, 45, 0.85) 0%, rgba(10, 10, 20, 0.95) 100%);
+      border: 1px solid var(--border-glow);
+      border-radius: 24px;
+      padding: 3rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 3rem;
+      backdrop-filter: blur(24px);
+    }
+
+    .install-steps-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+      margin-top: 1.5rem;
+    }
+
+    .step-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.95rem;
+      color: #cbd5e1;
+    }
+    .step-num {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: rgba(56, 189, 248, 0.2);
+      color: var(--accent-cyan);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 0.85rem;
+    }
+
+    /* Footer */
     footer {
       border-top: 1px solid var(--border-glass);
       text-align: center;
-      padding: 2.5rem 1.5rem;
-      font-size: 0.85rem;
+      padding: 3rem 1.5rem;
+      font-size: 0.9rem;
       color: #64748b;
     }
     footer a { color: var(--accent-cyan); text-decoration: none; }
 
-    @media(max-width: 860px) {
-      .loop-grid { grid-template-columns: 1fr; }
-      .extension-hero-card { flex-direction: column; align-items: flex-start; }
-      .hero-title { font-size: 2.5rem; }
+    @media(max-width: 900px) {
+      .hero-title { font-size: 2.8rem; }
+      .pyramid-grid { grid-template-columns: 1fr; }
+      .extension-showcase { flex-direction: column; align-items: flex-start; }
+      .nav-links { display: none; }
     }
   </style>
 </head>
 <body>
 
-<!-- Liquid Glass Nav (Neural Leaf Style) -->
+<!-- Liquid Glass Navbar -->
 <nav class="glass-liquid-nav">
   <div class="nav-container">
-    <a href="#" class="brand-logo">
+    <a href="#hero" class="brand-logo">
       <div class="brand-icon">&#x26A1;</div>
       <div class="brand-name">SLAB AGENT <span class="brand-badge">VSSUT</span></div>
     </a>
 
     <div class="nav-links">
-      <a href="/slab-agent-extension.zip" download="slab-agent-extension.zip" class="btn-liquid-nav">
-        &#x2B07;&#xFE0F; Chrome Extension (.ZIP)
-      </a>
-      <a href="https://github.com/ChandraPrakashMishra001/SLAB_webcmd_VSSUT" target="_blank" class="nav-btn">
-        &#x2B50; GitHub
-      </a>
+      <a href="#hero" class="nav-btn">Home</a>
+      <a href="#about" class="nav-btn">Problem</a>
+      <a href="#architecture" class="nav-btn">4-Layer Loop</a>
+      <a href="#agent-demo" class="nav-btn">Voice Agent</a>
+      <a href="#toolkit" class="nav-btn">Toolkit</a>
+      <a href="#extension" class="btn-liquid-nav">&#x2B07;&#xFE0F; Extension (.ZIP)</a>
+      <a href="https://github.com/ChandraPrakashMishra001/SLAB_webcmd_VSSUT" target="_blank" class="nav-btn">&#x2B50; GitHub</a>
     </div>
   </div>
 </nav>
 
-<!-- Hero Section with Dynamic Three.js WebGL Shader Animation Background -->
-<section class="hero-section">
-  <div id="shaderAnimationBg"></div>
+<!-- ════════════════════════════════════════════════════════════════════════════
+     SECTION 1: IMMERSIVE 100VH SHADER ANIMATION LANDING PAGE
+     ════════════════════════════════════════════════════════════════════════════ -->
+<section id="hero" class="section-hero">
+  <!-- Three.js WebGL Shader Canvas Canvas -->
+  <div id="shaderAnimationCanvas"></div>
 
   <div class="hero-content">
     <div class="university-badge">
@@ -656,109 +824,156 @@
 
     <h1 class="hero-title text-chrome">SLAB BROWSER AGENTS</h1>
     <p class="hero-subtitle">
-      Intelligent agents that explore websites, learn workflows, and automate deterministic web tasks with voice navigation and <strong>98% token reduction</strong>.
+      Intelligent autonomous agents that explore websites, learn workflows, and execute deterministic browser tasks with voice navigation and <strong>98% token reduction</strong>.
     </p>
 
-    <!-- Download Chrome Extension Hero Card -->
-    <div class="extension-hero-card">
-      <div class="callout-info">
-        <span class="badge-pill">&#x1F525; HACKATHON RELEASE V1.0.0</span>
-        <div class="callout-heading">SLAB Voice Browser Extension</div>
-        <div class="callout-sub">Voice-guided browsing, streaming chat, live page reading, customizable skills, and MCP tools.</div>
-      </div>
-      <a href="/slab-agent-extension.zip" download="slab-agent-extension.zip" class="btn-download-glow">
-        <span>&#x2B07;&#xFE0F; Download Extension (.ZIP)</span>
+    <div class="hero-cta-group">
+      <a href="/slab-agent-extension.zip" download="slab-agent-extension.zip" class="btn-cta-primary">
+        <span>&#x2B07;&#xFE0F; Download Chrome Extension (.ZIP)</span>
+      </a>
+      <a href="#agent-demo" class="btn-cta-secondary">
+        <span>&#x1F3A4; Try Live Voice Agent</span>
+      </a>
+      <a href="#architecture" class="btn-cta-secondary">
+        <span>&#x26A1; 4-Layer Architecture</span>
       </a>
     </div>
   </div>
+
+  <a href="#about" class="scroll-indicator">
+    <span>Scroll to explore</span>
+    <span>↓</span>
+  </a>
 </section>
 
-<!-- Main Container -->
-<div class="main-container">
+<!-- ════════════════════════════════════════════════════════════════════════════
+     SECTION 2: PROBLEM STATEMENT & ENTRY REQUIREMENTS
+     ════════════════════════════════════════════════════════════════════════════ -->
+<section id="about" class="section-wrap">
+  <div class="section-heading-box">
+    <div class="section-tag">Hackathon Brief</div>
+    <h2 class="section-title">The Challenge & Mandate</h2>
+    <p class="section-sub">Official Problem Statement for SLAB Hackathon 2026 hosted by Webcmd at VSSUT.</p>
+  </div>
 
-  <!-- Problem Statement Banner -->
-  <div class="problem-glass-banner">
-    <div class="problem-icon-wrap">&#x1F3AF;</div>
+  <div class="problem-glass-card">
+    <div class="problem-icon-box">&#x1F3AF;</div>
     <div>
-      <div class="problem-label">Hackathon Problem Statement</div>
-      <div class="problem-text">
+      <div style="font-size:0.8rem;font-weight:700;color:var(--accent-emerald);letter-spacing:0.1em;text-transform:uppercase;">Official Problem Statement</div>
+      <div style="font-size:1.15rem;color:#f1f5f9;margin-top:0.3rem;line-height:1.6;">
         Build an <strong>AI-powered Browser Agent</strong> that can explore websites, learn real-world workflows, and reliably automate and reuse those workflows with <strong>structured outputs</strong>.
       </div>
     </div>
   </div>
 
-  <!-- 4-Layer SLAB Architecture Loop -->
-  <div class="loop-grid">
-    <div class="loop-card">
-      <div class="loop-layer-tag">Layer 0</div>
-      <div class="loop-title">&#x1F52D; Explore</div>
-      <div class="loop-desc">Live sandboxed Playwright session. Inspects DOM structures, network endpoints, and state signatures.</div>
-    </div>
-    <div class="loop-card">
-      <div class="loop-layer-tag">Layer 1</div>
-      <div class="loop-title">&#x1F9E0; Learn</div>
-      <div class="loop-desc">Preserves endpoint sitemaps, auth tokens, and DOM selectors into persistent agent memory.</div>
-    </div>
-    <div class="loop-card">
-      <div class="loop-layer-tag">Layer 2</div>
-      <div class="loop-title">&#x1F6E0;&#xFE0F; Adapt</div>
-      <div class="loop-desc">Synthesizes deterministic CLI adapters with structured JSON output schemas.</div>
-    </div>
-    <div class="loop-card">
-      <div class="loop-layer-tag">Layer 3</div>
-      <div class="loop-title">&#x26A1; Automate</div>
-      <div class="loop-desc">Sub-second execution via <code>webcmd &lt;site&gt; -f json</code> with up to 98% token reduction.</div>
-    </div>
+  <div class="requirements-grid">
+    <div class="req-box">&#x2705; <strong>GitHub Account</strong> mandatory for entry</div>
+    <div class="req-box">&#x2705; <strong>Webcmd Integration</strong> required</div>
+    <div class="req-box">&#x2705; <strong>All Team Members</strong> registered</div>
+    <div class="req-box">&#x1F558; <strong>Hackathon Timer:</strong> 10:30 AM – 12:30 PM</div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════════════════
+     SECTION 3: 4-LAYER SLAB ARCHITECTURE
+     ════════════════════════════════════════════════════════════════════════════ -->
+<section id="architecture" class="section-wrap">
+  <div class="section-heading-box">
+    <div class="section-tag">Core Philosophy</div>
+    <h2 class="section-title">4-Layer Self-Learning Architecture</h2>
+    <p class="section-sub">Explore once. Learn the workflow. Reuse the command deterministically.</p>
   </div>
 
-  <!-- Tabs Navigation -->
-  <div class="tabs-header">
-    <button class="tab-item active" onclick="activateTab('voice')">&#x1F3A4; Live Voice Agent</button>
-    <button class="tab-item" onclick="activateTab('prompt')">&#x26A1; Prompt Optimizer</button>
-    <button class="tab-item" onclick="activateTab('suggest')">&#x1F50D; Auto-Suggest Engine</button>
-    <button class="tab-item" onclick="activateTab('idea')">&#x1F4A1; Idea Generator</button>
+  <div class="pyramid-grid">
+    <div class="layer-card">
+      <div class="layer-badge">Layer 0</div>
+      <div class="layer-heading">&#x1F52D; Explore</div>
+      <div class="layer-body">Sandboxed Playwright session. Explores unfamiliar websites, inspects DOM elements, and maps network endpoints.</div>
+    </div>
+    <div class="layer-card">
+      <div class="layer-badge">Layer 1</div>
+      <div class="layer-heading">&#x1F9E0; Learn</div>
+      <div class="layer-body">Preserves endpoint graphs, authentication cookies, and DOM selector memory for persistent re-use.</div>
+    </div>
+    <div class="layer-card">
+      <div class="layer-badge">Layer 2</div>
+      <div class="layer-heading">&#x1F6E0;&#xFE0F; Adapt</div>
+      <div class="layer-body">Synthesizes reliable TypeScript CLI adapters with structured <code>-f json</code> output schemas.</div>
+    </div>
+    <div class="layer-card">
+      <div class="layer-badge">Layer 3</div>
+      <div class="layer-heading">&#x26A1; Automate</div>
+      <div class="layer-body">Instant deterministic execution via <code>webcmd &lt;site&gt; -f json</code> with up to 98% token reduction.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════════════════
+     SECTION 4: LIVE VOICE & BROWSER AGENT ARENA
+     ════════════════════════════════════════════════════════════════════════════ -->
+<section id="agent-demo" class="section-wrap">
+  <div class="section-heading-box">
+    <div class="section-tag">Interactive Demo</div>
+    <h2 class="section-title">Live Voice Browser Agent</h2>
+    <p class="section-sub">Speak or type naturally. The agent executes real browser actions, launches websites, and returns structured data cards.</p>
   </div>
 
-  <!-- Tab 0: Live Voice Agent -->
-  <div id="tab-voice" class="tab-panel active">
-    <div class="glass-card">
-      <div class="card-heading">&#x1F3A4; Live Voice Browser Agent (Interactive Action Test)</div>
-
-      <div class="voice-dock">
-        <button id="micBtn" class="mic-button-big" onclick="toggleSpeech()" title="Click to Speak">
-          &#x1F3A4;
-        </button>
-        <div id="voiceStatus" class="voice-status-label">Click microphone to speak or type instruction below</div>
-      </div>
-
-      <div id="chatBox" class="chat-display">
-        <div class="chat-msg agent">
-          &#x1F916; <strong>SLAB Autonomous Agent is ready!</strong> Speak or type a command. I will execute web actions, fetch structured data, or navigate websites for you:
-        </div>
-      </div>
-
-      <div class="row-flex">
-        <div class="flex-grow">
-          <input type="text" id="voiceTextInput" placeholder="Try: 'open Flipkart', 'Find cheap flights from Delhi to London', or 'Track Bitcoin price'" onkeydown="if(event.key==='Enter') submitVoiceMessage()" />
-        </div>
-        <button class="btn-action btn-primary-action" onclick="submitVoiceMessage()">
-          &#x27A4; Execute
-        </button>
-      </div>
-
-      <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-top:0.85rem;">
-        <button class="btn-action btn-secondary-action" onclick="quickFillVoice('open Flipkart')">&#x1F6D2; Open Flipkart</button>
-        <button class="btn-action btn-secondary-action" onclick="quickFillVoice('Find cheap flights from Delhi to London')">&#x2708;&#xFE0F; Flight Search</button>
-        <button class="btn-action btn-secondary-action" onclick="quickFillVoice('Track Bitcoin price with webcmd')">&#x1F4B0; Bitcoin Price</button>
-        <button class="btn-action btn-secondary-action" onclick="quickFillVoice('Find top Hacker News tech stories')">&#x1F525; Top Hacker News</button>
+  <div class="agent-arena-card">
+    <div class="voice-interactive-dock">
+      <button id="micBtn" class="mic-btn-main" onclick="toggleSpeech()" title="Click to Speak">
+        &#x1F3A4;
+      </button>
+      <div id="voiceStatus" style="margin-top:1rem;font-size:0.95rem;color:var(--text-muted);">
+        Click microphone to speak or type instruction below
       </div>
     </div>
+
+    <div id="chatBox" class="chat-stream-box">
+      <div class="bubble-msg agent">
+        &#x1F916; <strong>SLAB Voice Agent is active!</strong> Try speaking or typing commands like <em>"open Flipkart"</em>, <em>"Find cheap flights from Delhi to London"</em>, or <em>"Track Bitcoin price"</em>.
+      </div>
+    </div>
+
+    <div class="row-flex">
+      <div class="flex-grow">
+        <input type="text" id="voiceTextInput" placeholder="Speak or type a command... e.g. 'open Flipkart' or 'Find cheap flights from Delhi to London'" onkeydown="if(event.key==='Enter') submitVoiceMessage()" />
+      </div>
+      <button class="btn-action btn-primary-action" onclick="submitVoiceMessage()">
+        &#x27A4; Execute
+      </button>
+    </div>
+
+    <div style="display:flex;gap:0.6rem;flex-wrap:wrap;margin-top:1rem;">
+      <button class="btn-action btn-secondary-action" onclick="quickFillVoice('open Flipkart')">&#x1F6D2; Open Flipkart</button>
+      <button class="btn-action btn-secondary-action" onclick="quickFillVoice('Find cheap flights from Delhi to London')">&#x2708;&#xFE0F; Flight Search</button>
+      <button class="btn-action btn-secondary-action" onclick="quickFillVoice('Track Bitcoin price with webcmd')">&#x1F4B0; Bitcoin Price</button>
+      <button class="btn-action btn-secondary-action" onclick="quickFillVoice('Find top Hacker News tech stories')">&#x1F525; Top Hacker News</button>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════════════════
+     SECTION 5: DEVELOPER TOOLKIT & TOOLS
+     ════════════════════════════════════════════════════════════════════════════ -->
+<section id="toolkit" class="section-wrap">
+  <div class="section-heading-box">
+    <div class="section-tag">Hackathon Suite</div>
+    <h2 class="section-title">Developer Toolkit & CLI Engines</h2>
+    <p class="section-sub">Built-in optimization, suggestion, and blueprint generation tools.</p>
+  </div>
+
+  <div class="tabs-nav">
+    <button class="tab-trigger active" onclick="switchToolkitTab('prompt')">&#x26A1; Prompt Optimizer</button>
+    <button class="tab-trigger" onclick="switchToolkitTab('suggest')">&#x1F50D; Auto-Suggest Engine</button>
+    <button class="tab-trigger" onclick="switchToolkitTab('idea')">&#x1F4A1; Idea Generator</button>
   </div>
 
   <!-- Tab 1: Prompt Optimizer -->
-  <div id="tab-prompt" class="tab-panel">
-    <div class="glass-card">
-      <div class="card-heading">&#x26A1; Token-Minimizing Prompt Optimizer (98% Token Reduction)</div>
+  <div id="pane-prompt" class="tab-pane active">
+    <div class="toolkit-card">
+      <div style="font-family:var(--font-display);font-size:1.25rem;font-weight:700;color:#fff;margin-bottom:1rem;">
+        &#x26A1; Token-Minimizing Prompt Optimizer (98% Token Reduction)
+      </div>
       <div style="margin-bottom:1rem;">
         <textarea id="promptInput" placeholder="e.g. Please go to Hacker News and find the top 5 AI stories with titles and links"></textarea>
       </div>
@@ -775,10 +990,12 @@
     </div>
   </div>
 
-  <!-- Tab 2: Auto-Suggest Engine -->
-  <div id="tab-suggest" class="tab-panel">
-    <div class="glass-card">
-      <div class="card-heading">&#x1F50D; Auto-Suggest from 842 Webcmd Adapters</div>
+  <!-- Tab 2: Auto-Suggest -->
+  <div id="pane-suggest" class="tab-pane">
+    <div class="toolkit-card">
+      <div style="font-family:var(--font-display);font-size:1.25rem;font-weight:700;color:#fff;margin-bottom:1rem;">
+        &#x1F50D; Auto-Suggest from 842 Webcmd Adapters
+      </div>
       <div style="margin-bottom:1rem;">
         <input type="text" id="suggestInput" placeholder="e.g. track cryptocurrency prices on CoinGecko" onkeydown="if(event.key==='Enter') executeSuggest()" />
       </div>
@@ -793,9 +1010,11 @@
   </div>
 
   <!-- Tab 3: Idea Generator -->
-  <div id="tab-idea" class="tab-panel">
-    <div class="glass-card">
-      <div class="card-heading">&#x1F4A1; SLAB Browser Agent Idea Generator</div>
+  <div id="pane-idea" class="tab-pane">
+    <div class="toolkit-card">
+      <div style="font-family:var(--font-display);font-size:1.25rem;font-weight:700;color:#fff;margin-bottom:1rem;">
+        &#x1F4A1; SLAB Browser Agent Idea Generator
+      </div>
       <div class="chip-selector">
         <div class="filter-chip active" onclick="chooseVertical('all', this)">&#x1F310; All</div>
         <div class="filter-chip" onclick="chooseVertical('ecommerce', this)">&#x1F6D2; E-Commerce</div>
@@ -811,14 +1030,42 @@
           &#x1F4A1; Generate Blueprint
         </button>
       </div>
+      <div id="ideaGrid" class="idea-layout"></div>
     </div>
-    <div id="ideaGrid" class="idea-layout"></div>
   </div>
+</section>
 
-</div>
+<!-- ════════════════════════════════════════════════════════════════════════════
+     SECTION 6: CHROME EXTENSION & MCP INTEGRATION HUB
+     ════════════════════════════════════════════════════════════════════════════ -->
+<section id="extension" class="section-wrap">
+  <div class="extension-showcase">
+    <div style="flex:1">
+      <div style="font-family:var(--font-display);font-size:0.8rem;font-weight:800;color:var(--accent-emerald);letter-spacing:0.1em;text-transform:uppercase;">Browser Extension</div>
+      <h2 style="font-family:var(--font-display);font-size:2rem;font-weight:900;color:#fff;margin-top:0.3rem;">SLAB Chrome Extension v1.0.0</h2>
+      <p style="color:var(--text-muted);font-size:0.95rem;margin-top:0.5rem;line-height:1.6;">
+        Install the autonomous voice assistant directly into Google Chrome. Features Web Speech recognition, DOM text reading, streaming chat, customizable skills, and MCP tools.
+      </p>
 
-<!-- Footer -->
-<footer>
+      <div class="install-steps-list">
+        <div class="step-item"><div class="step-num">1</div> Download and extract <code>slab-agent-extension.zip</code></div>
+        <div class="step-item"><div class="step-num">2</div> Open <code>chrome://extensions/</code> and toggle <strong>Developer Mode</strong></div>
+        <div class="step-item"><div class="step-num">3</div> Click <strong>Load unpacked</strong> and select the extracted folder</div>
+      </div>
+    </div>
+
+    <div>
+      <a href="/slab-agent-extension.zip" download="slab-agent-extension.zip" class="btn-cta-primary" style="padding:1.1rem 2.2rem;font-size:1.1rem;">
+        <span>&#x2B07;&#xFE0F; Download Extension (.ZIP)</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════════════════
+     FOOTER
+     ════════════════════════════════════════════════════════════════════════════ -->
+<footer id="footer">
   <strong>SLAB Hackathon 2026</strong> — Veer Surendra Sai University of Technology, Odisha &nbsp;·&nbsp;
   <a href="https://github.com/ChandraPrakashMishra001/SLAB_webcmd_VSSUT" target="_blank">SLAB Webcmd Repository</a> &nbsp;·&nbsp;
   Theme: <strong>Browser Agents</strong> · Design: <strong>Neural Leaf Liquid Glass + WebGL Shader</strong>
@@ -827,7 +1074,7 @@
 <script>
   // ── WebGL Shader Animation Setup (Three.js) ────────────────────────────────
   function initShaderBackground() {
-    const container = document.getElementById('shaderAnimationBg');
+    const container = document.getElementById('shaderAnimationCanvas');
     if (!container || typeof THREE === 'undefined') return;
 
     const vertexShader = `
@@ -856,7 +1103,7 @@
           }
         }
         
-        gl_FragColor = vec4(color[0], color[1], color[2], 0.7);
+        gl_FragColor = vec4(color[0], color[1], color[2], 0.75);
       }
     `;
 
@@ -889,7 +1136,7 @@
 
     const resize = () => {
       const w = container.clientWidth || window.innerWidth;
-      const h = container.clientHeight || 500;
+      const h = container.clientHeight || window.innerHeight;
       renderer.setSize(w, h);
       uniforms.resolution.value.x = renderer.domElement.width;
       uniforms.resolution.value.y = renderer.domElement.height;
@@ -912,12 +1159,12 @@
   let speechRec = null;
   let isSpeechRecording = false;
 
-  function activateTab(tabKey) {
-    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-    document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
-    document.getElementById('tab-' + tabKey).classList.add('active');
-    const tabs = document.querySelectorAll('.tab-item');
-    const map = { voice: 0, prompt: 1, suggest: 2, idea: 3 };
+  function switchToolkitTab(tabKey) {
+    document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-trigger').forEach(t => t.classList.remove('active'));
+    document.getElementById('pane-' + tabKey).classList.add('active');
+    const tabs = document.querySelectorAll('.tab-trigger');
+    const map = { prompt: 0, suggest: 1, idea: 2 };
     if (tabs[map[tabKey]]) tabs[map[tabKey]].classList.add('active');
   }
 
@@ -994,14 +1241,14 @@
 
     // Add user message
     const uMsg = document.createElement('div');
-    uMsg.className = 'chat-msg user';
+    uMsg.className = 'bubble-msg user';
     uMsg.textContent = msg;
     box.appendChild(uMsg);
     box.scrollTop = box.scrollHeight;
 
-    // Add agent thinking placeholder
+    // Add agent placeholder
     const aMsg = document.createElement('div');
-    aMsg.className = 'chat-msg agent';
+    aMsg.className = 'bubble-msg agent';
     aMsg.innerHTML = '&#x26A1; <em>Agent executing 4-layer browser automation...</em>';
     box.appendChild(aMsg);
     box.scrollTop = box.scrollHeight;
@@ -1044,7 +1291,7 @@
           <div style="margin-top:0.75rem;font-family:var(--font-mono);font-size:0.8rem;color:#38bdf8;">
             <code>${sanitize(resData.optimization.optimizedCommand)}</code>
           </div>
-          <div class="token-savings-badge">&#x2728; ${resData.optimization.percentReduction}% Token Reduction (${resData.optimization.originalEstimatedTokens} -> ${resData.optimization.optimizedEstimatedTokens} tokens)</div>
+          <div class="token-savings-badge">&#x2728; ${resData.optimization.percentReduction}% Token Reduction</div>
         `;
       } else if (resData.type === 'CRYPTO') {
         replyHtml = `
@@ -1082,7 +1329,7 @@
           <div style="margin-top:0.5rem;font-family:var(--font-mono);font-size:0.85rem;color:#38bdf8;">
             <code>${sanitize(resData.optimization.optimizedCommand)}</code>
           </div>
-          <div class="token-savings-badge">&#x2728; ${resData.optimization.percentReduction}% Token Reduction (${resData.optimization.originalEstimatedTokens} -> ${resData.optimization.optimizedEstimatedTokens} tokens)</div>
+          <div class="token-savings-badge">&#x2728; ${resData.optimization.percentReduction}% Token Reduction</div>
         `;
       }
 
