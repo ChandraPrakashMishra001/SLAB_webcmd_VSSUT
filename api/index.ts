@@ -1,4 +1,6 @@
 import type { IncomingMessage, ServerResponse } from 'http';
+import fs from 'fs';
+import path from 'path';
 import { optimizePrompt } from '../src/commands/prompt.js';
 import { suggestCommands } from '../src/commands/suggest.js';
 import { generateIdeas, listIdeaVerticals } from '../src/commands/idea.js';
@@ -39,6 +41,35 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
     });
     res.end();
     return;
+  }
+
+  // Root UI
+  if (method === 'GET' && (url.pathname === '/' || url.pathname === '/index.html' || url.pathname === '')) {
+    try {
+      const possiblePaths = [
+        path.join(process.cwd(), 'public/index.html'),
+        path.join(process.cwd(), 'index.html'),
+        path.join(__dirname, '../public/index.html'),
+        path.join(__dirname, '../index.html'),
+      ];
+      let html = '';
+      for (const p of possiblePaths) {
+        if (fs.existsSync(p)) {
+          html = fs.readFileSync(p, 'utf8');
+          break;
+        }
+      }
+      if (html) {
+        res.writeHead(200, {
+          'Content-Type': 'text/html; charset=utf-8',
+          'Access-Control-Allow-Origin': '*',
+        });
+        res.end(html);
+        return;
+      }
+    } catch {
+      // fallback
+    }
   }
 
   // Health

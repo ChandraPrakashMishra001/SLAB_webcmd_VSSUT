@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SLAB Hackathon — Browser Agents with Webcmd</title>
+  <style>
+    :root {
+      --bg: #f0f4ff;
+      --surface: #ffffff;
+      --surface2: #e8eef8;
+      --border: #c8d8f0;
+      --primary: #0a2d8f;
+      --primary-light: #1a4dbf;
+      --primary-glow: rgba(10,45,143,0.10);
+      --accent: #1565c0;
+      --green: #1b7a3e;
+      --green-light: #e8f5e9;
+      --orange: #c0392b;
+      --yellow: #f39c12;
+      --purple: #6c3483;
+      --text: #0d1b2a;
+      --muted: #4a5568;
+      --radius: 10px;
+      --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --mono: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      min-height: 100vh;
+    }
+
+    /* SLAB Hero Banner */
+    .slab-banner {
+      background: linear-gradient(135deg, #0a2d8f 0%, #1565c0 60%, #1976d2 100%);
+      color: #fff;
+      text-align: center;
+      padding: 2.5rem 1.5rem 2rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .slab-title {
+      font-size: 3.2rem;
+      font-weight: 900;
+      letter-spacing: .04em;
+      line-height: 1;
+    }
+    .slab-sub {
+      font-size: 1.2rem;
+      font-weight: 700;
+      letter-spacing: .18em;
+      opacity: .9;
+      margin-top: .25rem;
+    }
+    .slab-divider {
+      width: 60px;
+      height: 3px;
+      background: rgba(255,255,255,.5);
+      margin: 1.2rem auto;
+      border-radius: 2px;
+    }
+    .theme-label {
+      font-size: .75rem;
+      letter-spacing: .18em;
+      opacity: .75;
+      text-transform: uppercase;
+    }
+    .theme-title {
+      font-size: 1.9rem;
+      font-weight: 900;
+      letter-spacing: .04em;
+      margin-top: .2rem;
+    }
+    .theme-desc {
+      font-size: .95rem;
+      opacity: .88;
+      margin-top: .4rem;
+    }
+
+    /* Problem Statement Banner */
+    .problem-banner {
+      background: #fff;
+      border-left: 5px solid var(--primary);
+      border-bottom: 1px solid var(--border);
+      padding: 1.25rem 2rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    .problem-icon { font-size: 1.8rem; flex-shrink: 0; margin-top: .1rem; }
+    .problem-label {
+      font-size: .7rem;
+      font-weight: 800;
+      letter-spacing: .15em;
+      color: var(--primary);
+      text-transform: uppercase;
+      margin-bottom: .3rem;
+    }
+    .problem-text {
+      font-size: .95rem;
+      line-height: 1.65;
+      color: var(--text);
+    }
+    .problem-text strong { color: var(--primary); }
+    .problem-text em { color: #1565c0; font-style: normal; font-weight: 700; }
+
+    /* Top Nav */
+    header {
+      background: var(--primary);
+      padding: 0 2rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      height: 50px;
+      border-bottom: 2px solid rgba(255,255,255,.15);
+    }
+    .logo {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+    }
+    .logo span { color: rgba(255,255,255,.7); font-weight: 400; font-size: .85rem; }
+    .badge {
+      background: rgba(255,255,255,.15);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,.3);
+      border-radius: 20px;
+      padding: 2px 10px;
+      font-size: .7rem;
+      font-weight: 600;
+      letter-spacing: .05em;
+    }
+    .header-right {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+    }
+    .header-right a {
+      color: rgba(255,255,255,.75);
+      text-decoration: none;
+      font-size: .82rem;
+      transition: color .2s;
+    }
+    .header-right a:hover { color: #fff; }
+
+    /* Requirements bar */
+    .requirements {
+      background: #fff3e0;
+      border: 1.5px solid #ffcc02;
+      border-radius: 8px;
+      padding: .75rem 1.25rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: .5rem 2rem;
+      align-items: center;
+      font-size: .82rem;
+      color: #7b4b00;
+      max-width: 1100px;
+      margin: 1rem auto 0;
+    }
+    .req-item { display: flex; align-items: center; gap: .4rem; font-weight: 600; }
+
+    /* 4-Layer Agent Loop */
+    .agent-loop {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      padding: 1.25rem 0 0;
+      max-width: 1100px;
+      margin: 0 auto;
+      flex-wrap: wrap;
+    }
+    .loop-step {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: .9rem 1.2rem;
+      text-align: center;
+      flex: 1;
+      min-width: 150px;
+      transition: border-color .2s, transform .2s;
+    }
+    .loop-step:hover { border-color: var(--primary); transform: translateY(-2px); }
+    .loop-num {
+      font-size: .65rem;
+      font-weight: 800;
+      letter-spacing: .12em;
+      color: var(--primary);
+      text-transform: uppercase;
+    }
+    .loop-title {
+      font-size: 1rem;
+      font-weight: 800;
+      color: var(--primary);
+      margin: .2rem 0;
+    }
+    .loop-desc { font-size: .75rem; color: var(--muted); line-height: 1.4; }
+    .loop-arrow {
+      font-size: 1.2rem;
+      color: var(--primary);
+      padding: 0 .4rem;
+      flex-shrink: 0;
+    }
+
+    /* Main Container */
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 1.5rem;
+    }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      gap: 4px;
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 4px;
+      margin-bottom: 1.5rem;
+    }
+    .tab {
+      flex: 1;
+      padding: .6rem 1rem;
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      border-radius: 7px;
+      cursor: pointer;
+      font-size: .9rem;
+      font-weight: 600;
+      transition: all .2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: .5rem;
+    }
+    .tab:hover { color: var(--text); background: var(--surface2); }
+    .tab.active {
+      background: var(--primary);
+      color: #fff;
+      font-weight: 700;
+    }
+
+    /* Panels */
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    .card {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+    }
+    .card-title {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      color: var(--primary);
+    }
+    .card-title .icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      background: var(--primary-glow);
+    }
+
+    /* Form Controls */
+    textarea, input[type="text"], select {
+      width: 100%;
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      color: var(--text);
+      border-radius: 7px;
+      padding: .75rem 1rem;
+      font-size: .9rem;
+      font-family: var(--font);
+      resize: vertical;
+      outline: none;
+      transition: border .2s;
+    }
+    textarea:focus, input:focus, select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-glow);
+    }
+    textarea { min-height: 80px; }
+    select { cursor: pointer; }
+
+    .form-row {
+      display: flex;
+      gap: .75rem;
+      margin-top: .75rem;
+      align-items: flex-end;
+      flex-wrap: wrap;
+    }
+    .form-row .grow { flex: 1; min-width: 200px; }
+
+    button.btn {
+      padding: .65rem 1.4rem;
+      border: none;
+      border-radius: 7px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: .9rem;
+      transition: all .2s;
+      display: flex;
+      align-items: center;
+      gap: .4rem;
+      white-space: nowrap;
+    }
+    .btn-primary {
+      background: var(--primary);
+      color: #fff;
+    }
+    .btn-primary:hover { background: var(--primary-light); transform: translateY(-1px); }
+    .btn-primary:active { transform: translateY(0); }
+    .btn-primary:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+    .btn-secondary {
+      background: var(--surface2);
+      color: var(--text);
+      border: 1.5px solid var(--border);
+    }
+    .btn-secondary:hover { border-color: var(--primary); }
+
+    label {
+      display: block;
+      font-size: .8rem;
+      color: var(--muted);
+      margin-bottom: .4rem;
+      font-weight: 600;
+    }
+
+    /* Results */
+    .result-box {
+      margin-top: 1rem;
+      border-radius: var(--radius);
+      overflow: hidden;
+      border: 1.5px solid var(--border);
+      display: none;
+    }
+    .result-box.show { display: block; }
+
+    .result-header {
+      background: var(--primary);
+      padding: .6rem 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: .8rem;
+      color: #fff;
+    }
+    .result-header .status {
+      display: flex;
+      align-items: center;
+      gap: .4rem;
+    }
+    .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #4caf50;
+      animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .4; } }
+    .copy-btn {
+      background: rgba(255,255,255,.2);
+      border: 1px solid rgba(255,255,255,.4);
+      color: #fff;
+      border-radius: 5px;
+      padding: 2px 8px;
+      cursor: pointer;
+      font-size: .75rem;
+      transition: all .2s;
+    }
+    .copy-btn:hover { background: rgba(255,255,255,.35); }
+    .copy-btn.copied { background: rgba(76,175,80,.4); }
+
+    pre {
+      background: #0d1b2a;
+      color: #e8eef8;
+      padding: 1.25rem;
+      overflow-x: auto;
+      font-family: var(--mono);
+      font-size: .82rem;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    /* Metric Pills */
+    .metrics {
+      display: flex;
+      gap: .75rem;
+      flex-wrap: wrap;
+      margin-top: 1rem;
+    }
+    .metric {
+      background: var(--primary-glow);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: .3rem .9rem;
+      font-size: .78rem;
+      display: flex;
+      align-items: center;
+      gap: .35rem;
+    }
+    .metric .val { font-weight: 800; color: var(--primary); }
+    .metric.green .val { color: var(--green); }
+    .metric.purple .val { color: var(--purple); }
+
+    /* Suggestion Cards */
+    .suggestion-list {
+      display: flex;
+      flex-direction: column;
+      gap: .75rem;
+      margin-top: 1rem;
+    }
+    .suggestion-card {
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem 1.25rem;
+      display: flex;
+      gap: 1rem;
+      align-items: flex-start;
+      transition: border-color .2s;
+    }
+    .suggestion-card:hover { border-color: var(--primary); }
+    .rank-badge {
+      width: 28px;
+      height: 28px;
+      background: var(--primary);
+      color: #fff;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: .85rem;
+      flex-shrink: 0;
+    }
+    .suggestion-info { flex: 1; min-width: 0; }
+    .suggestion-name {
+      font-weight: 700;
+      font-size: .95rem;
+      margin-bottom: .2rem;
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      flex-wrap: wrap;
+    }
+    .site-tag {
+      background: var(--primary-glow);
+      color: var(--primary);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 1px 6px;
+      font-size: .72rem;
+      font-weight: 700;
+    }
+    .suggestion-desc { color: var(--muted); font-size: .82rem; margin-bottom: .5rem; line-height: 1.5; }
+    .install-cmd {
+      background: #0d1b2a;
+      border-radius: 5px;
+      padding: .4rem .75rem;
+      font-family: var(--mono);
+      font-size: .78rem;
+      color: #4caf50;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: .5rem;
+      overflow: hidden;
+    }
+    .install-cmd span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .score-bar-wrap { display: flex; align-items: center; gap: .5rem; }
+    .score-bar { flex: 1; height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+    .score-fill { height: 100%; background: linear-gradient(90deg, var(--primary), #1976d2); border-radius: 2px; }
+    .score-num { font-size: .75rem; color: var(--muted); flex-shrink: 0; }
+
+    /* Idea Cards */
+    .idea-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    .idea-card {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: .75rem;
+      transition: border-color .2s, transform .2s;
+    }
+    .idea-card:hover { border-color: var(--primary); transform: translateY(-2px); }
+    .idea-title { font-weight: 800; font-size: .95rem; color: var(--primary); line-height: 1.4; }
+    .idea-summary { color: var(--muted); font-size: .82rem; line-height: 1.55; }
+    .idea-layers { display: flex; flex-direction: column; gap: .4rem; }
+    .idea-layer { display: flex; gap: .5rem; font-size: .78rem; }
+    .layer-num {
+      width: 20px; height: 20px;
+      background: var(--primary);
+      color: #fff;
+      border-radius: 4px;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: .7rem; flex-shrink: 0;
+    }
+    .layer-text { color: var(--muted); line-height: 1.4; }
+    .idea-cmd {
+      background: #0d1b2a;
+      border-radius: 5px;
+      padding: .4rem .75rem;
+      font-family: var(--mono);
+      font-size: .75rem;
+      color: #4caf50;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .vertical-chips { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: 1rem; }
+    .chip {
+      padding: .35rem .9rem;
+      border-radius: 20px;
+      border: 1.5px solid var(--border);
+      background: var(--surface);
+      color: var(--muted);
+      cursor: pointer;
+      font-size: .82rem;
+      font-weight: 600;
+      transition: all .2s;
+    }
+    .chip:hover { border-color: var(--primary); color: var(--primary); }
+    .chip.active { background: var(--primary); border-color: var(--primary); color: #fff; font-weight: 700; }
+
+    /* Spinner */
+    .spinner {
+      display: none;
+      width: 16px; height: 16px;
+      border: 2px solid rgba(255,255,255,.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading .spinner { display: block; }
+    .loading .btn-icon { display: none; }
+
+    /* Recommended */
+    .recommended {
+      background: var(--green-light);
+      border: 1px solid #a5d6a7;
+      border-radius: 7px;
+      padding: .75rem 1rem;
+      font-size: .85rem;
+      color: var(--green);
+      margin-top: .75rem;
+      display: flex;
+      gap: .5rem;
+      align-items: flex-start;
+    }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      padding: 2rem;
+      color: var(--muted);
+      font-size: .8rem;
+      border-top: 1.5px solid var(--border);
+      margin-top: 3rem;
+      background: var(--surface);
+    }
+    footer strong { color: var(--primary); }
+    footer a { color: var(--primary); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 640px) {
+      .slab-title { font-size: 2.3rem; }
+      .theme-title { font-size: 1.4rem; }
+      .tabs { flex-direction: column; }
+      .idea-grid { grid-template-columns: 1fr; }
+      .loop-arrow { display: none; }
+      .problem-banner { flex-direction: column; padding: 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- SLAB Hero Banner -->
+<div class="slab-banner">
+  <div class="slab-title">SLAB</div>
+  <div class="slab-sub">HACKATHON</div>
+  <div class="slab-divider"></div>
+  <div class="theme-label">Theme</div>
+  <div class="theme-title">&#x1F916; BROWSER AGENTS</div>
+  <div class="theme-desc">Intelligent agents that explore, learn and automate the web.</div>
+  <div style="margin-top:.8rem;font-size:.75rem;opacity:.65;letter-spacing:.08em;">VEER SURENDRA SAI UNIVERSITY OF TECHNOLOGY · ODISHA</div>
+</div>
+
+<!-- Problem Statement -->
+<div class="problem-banner">
+  <div class="problem-icon">&#x1F3AF;</div>
+  <div>
+    <div class="problem-label">Problem Statement</div>
+    <div class="problem-text">
+      Build an <strong>AI-powered</strong> Browser Agent that can <em>explore websites</em>,
+      learn real world workflows, and reliably <em>automate and reuse</em> those workflows
+      with <em>structured outputs.</em>
+    </div>
+  </div>
+</div>
+
+<!-- Top Nav -->
+<header>
+  <div class="logo">&#x26A1; Webcmd <span>— Official SLAB Integration</span></div>
+  <div class="badge">MANDATORY INTEGRATION</div>
+  <div class="header-right">
+    <a href="https://github.com/agentrhq/webcmd" target="_blank">&#x2B50; GitHub</a>
+    <a href="/docs/GUIDE.md" target="_blank">&#x1F4D6; Guide</a>
+  </div>
+</header>
+
+<!-- Entry Requirements -->
+<div class="container" style="padding-top:1.25rem;padding-bottom:0">
+  <div class="requirements">
+    <div class="req-item">&#x26A0;&#xFE0F; <strong>Entry Requirements:</strong></div>
+    <div class="req-item">&#x2705; GitHub account (mandatory)</div>
+    <div class="req-item">&#x2705; Webcmd integration in project</div>
+    <div class="req-item">&#x2705; All team members registered</div>
+    <div class="req-item">&#x1F558; Hackathon: 10:30 AM – 12:30 PM</div>
+  </div>
+</div>
+
+<!-- 4-Layer Agent Loop -->
+<div class="agent-loop">
+  <div class="loop-step">
+    <div class="loop-num">Layer 0</div>
+    <div class="loop-title">&#x1F52D; Explore</div>
+    <div class="loop-desc">Live Playwright browser session. Inspect pages, capture network calls, extract DOM.</div>
+  </div>
+  <div class="loop-arrow">→</div>
+  <div class="loop-step">
+    <div class="loop-num">Layer 1–2</div>
+    <div class="loop-title">&#x1F9E0; Learn</div>
+    <div class="loop-desc">Save sitemap memory & endpoint graph. Author a reusable CLI adapter.</div>
+  </div>
+  <div class="loop-arrow">→</div>
+  <div class="loop-step">
+    <div class="loop-num">Layer 3</div>
+    <div class="loop-title">&#x26A1; Automate</div>
+    <div class="loop-desc">Run <code>webcmd &lt;site&gt; &lt;cmd&gt; -f json</code> deterministically. 98% fewer tokens.</div>
+  </div>
+  <div class="loop-arrow">→</div>
+  <div class="loop-step">
+    <div class="loop-num">Output</div>
+    <div class="loop-title">&#x1F4CA; Structured</div>
+    <div class="loop-desc">Always <code>-f json</code>. No hallucinations. Reusable across every future agent run.</div>
+  </div>
+</div>
+
+<!-- Main Container -->
+<div class="container">
+
+  <!-- Tabs -->
+  <div class="tabs" style="margin-top:1.5rem">
+    <button class="tab active" onclick="switchTab('prompt')">
+      &#x26A1; Prompt Optimizer
+    </button>
+    <button class="tab" onclick="switchTab('suggest')">
+      &#x1F50D; Auto-Suggest
+    </button>
+    <button class="tab" onclick="switchTab('idea')">
+      &#x1F4A1; Idea Generator
+    </button>
+  </div>
+
+  <!-- Panel 1: Prompt Optimizer -->
+  <div id="panel-prompt" class="panel active">
+    <div class="card">
+      <div class="card-title">
+        <div class="icon">&#x26A1;</div>
+        Token-Minimizing Prompt Optimizer
+      </div>
+      <label>Enter your verbose browser instruction:</label>
+      <textarea id="prompt-input" placeholder="e.g. Please go to Hacker News and find the top 5 AI stories with titles and links"></textarea>
+      <div class="form-row">
+        <div class="grow"></div>
+        <button class="btn btn-primary" id="prompt-btn" onclick="runPromptOptimize()">
+          <div class="spinner"></div>
+          <span class="btn-icon">&#x26A1;</span>
+          Optimize
+        </button>
+      </div>
+      <div id="prompt-metrics" class="metrics"></div>
+      <div id="prompt-result" class="result-box">
+        <div class="result-header">
+          <div class="status"><div class="dot"></div> Structured Output</div>
+          <button class="copy-btn" onclick="copyResult('prompt-pre', this)">Copy</button>
+        </div>
+        <pre id="prompt-pre"></pre>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><div class="icon">&#x1F4CB;</div> Quick Browser Tasks</div>
+      <div style="display:flex;flex-direction:column;gap:.5rem;">
+        <button class="btn btn-secondary" style="justify-content:flex-start" onclick="fillPrompt('Go to Hacker News and find the top 5 AI stories with titles and links')">&#x1F525; Hacker News top AI stories</button>
+        <button class="btn btn-secondary" style="justify-content:flex-start" onclick="fillPrompt('Search PubMed for recent CRISPR gene therapy papers, limit 10')">&#x1F9EC; PubMed research papers</button>
+        <button class="btn btn-secondary" style="justify-content:flex-start" onclick="fillPrompt('Find round-trip flights from Delhi to London on Skyscanner')">&#x2708;&#xFE0F; Skyscanner flight search</button>
+        <button class="btn btn-secondary" style="justify-content:flex-start" onclick="fillPrompt('Track the current Bitcoin price on CoinGecko in USD')">&#x1F4B0; CoinGecko crypto price</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Panel 2: Auto-Suggest -->
+  <div id="panel-suggest" class="panel">
+    <div class="card">
+      <div class="card-title"><div class="icon">&#x1F50D;</div> Auto-Suggest from 842 Webcmd Adapters</div>
+      <label>Describe your browser automation goal in plain English:</label>
+      <input type="text" id="suggest-input" placeholder="e.g. track cryptocurrency prices on CoinGecko" onkeydown="if(event.key==='Enter') runSuggest()" />
+      <div class="form-row">
+        <div>
+          <label>Max results</label>
+          <select id="suggest-limit">
+            <option value="3">3</option>
+            <option value="5" selected>5</option>
+            <option value="10">10</option>
+          </select>
+        </div>
+        <div class="grow"></div>
+        <button class="btn btn-primary" id="suggest-btn" onclick="runSuggest()">
+          <div class="spinner"></div>
+          <span class="btn-icon">&#x1F50D;</span>
+          Find Commands
+        </button>
+      </div>
+      <div id="suggest-recommended" class="recommended" style="display:none"></div>
+      <div id="suggestion-list" class="suggestion-list"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><div class="icon">&#x26A1;</div> Quick Intents</div>
+      <div style="display:flex;flex-wrap:wrap;gap:.5rem;">
+        <button class="btn btn-secondary" onclick="fillSuggest('find cheap flights skyscanner')">&#x2708;&#xFE0F; Cheap flights</button>
+        <button class="btn btn-secondary" onclick="fillSuggest('latest AI research papers arxiv pubmed')">&#x1F4C4; AI papers</button>
+        <button class="btn btn-secondary" onclick="fillSuggest('bitcoin price coingecko')">&#x20BF; Crypto prices</button>
+        <button class="btn btn-secondary" onclick="fillSuggest('top hacker news stories today')">&#x1F525; HN stories</button>
+        <button class="btn btn-secondary" onclick="fillSuggest('amazon product price tracker')">&#x1F6D2; Amazon prices</button>
+        <button class="btn btn-secondary" onclick="fillSuggest('github trending repositories')">&#x1F4BB; GitHub trending</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Panel 3: Idea Generator -->
+  <div id="panel-idea" class="panel">
+    <div class="card">
+      <div class="card-title"><div class="icon">&#x1F4A1;</div> SLAB Browser Agent Idea Generator</div>
+      <p style="color:var(--muted);font-size:.85rem;margin-bottom:1rem;line-height:1.6;">
+        Generate production-ready browser agent ideas with <strong>complete 4-layer SLAB blueprints</strong> (Explore → Learn → Automate → Structured Output). Select a real-world vertical:
+      </p>
+      <div class="vertical-chips" id="vertical-chips">
+        <div class="chip active" onclick="selectVertical('all', this)">&#x1F310; All</div>
+        <div class="chip" onclick="selectVertical('ecommerce', this)">&#x1F6D2; E-Commerce</div>
+        <div class="chip" onclick="selectVertical('research', this)">&#x1F52C; Research</div>
+        <div class="chip" onclick="selectVertical('travel', this)">&#x2708;&#xFE0F; Travel</div>
+        <div class="chip" onclick="selectVertical('career', this)">&#x1F4BC; Career</div>
+        <div class="chip" onclick="selectVertical('social', this)">&#x1F4F1; Social</div>
+        <div class="chip" onclick="selectVertical('devtools', this)">&#x1F6E0;&#xFE0F; DevTools</div>
+        <div class="chip" onclick="selectVertical('finance', this)">&#x1F4B0; Finance</div>
+      </div>
+      <div style="display:flex;justify-content:flex-end;">
+        <button class="btn btn-primary" id="idea-btn" onclick="runIdea()">
+          <div class="spinner"></div>
+          <span class="btn-icon">&#x1F4A1;</span>
+          Generate Blueprint
+        </button>
+      </div>
+    </div>
+    <div id="idea-grid" class="idea-grid"></div>
+  </div>
+
+</div>
+
+<!-- Footer -->
+<footer>
+  <strong>SLAB Hackathon</strong> — Veer Surendra Sai University of Technology, Odisha &nbsp;·&nbsp;
+  <a href="https://github.com/agentrhq/webcmd" target="_blank">Webcmd on GitHub</a> &nbsp;·&nbsp;
+  Theme: <strong>Browser Agents</strong> · Integration: <strong>Webcmd (Mandatory)</strong>
+</footer>
+
+<script>
+  let selectedVertical = 'all';
+
+  function switchTab(name) {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('panel-' + name).classList.add('active');
+    const tabs = document.querySelectorAll('.tab');
+    const map = { prompt: 0, suggest: 1, idea: 2 };
+    tabs[map[name]].classList.add('active');
+  }
+
+  function setLoading(btnId, loading) {
+    const btn = document.getElementById(btnId);
+    if (loading) btn.classList.add('loading');
+    else btn.classList.remove('loading');
+    btn.disabled = loading;
+  }
+
+  function copyResult(preId, btn) {
+    navigator.clipboard.writeText(document.getElementById(preId).textContent).then(() => {
+      btn.textContent = '✓ Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+    });
+  }
+
+  function fillPrompt(text) { document.getElementById('prompt-input').value = text; }
+  function fillSuggest(text) { document.getElementById('suggest-input').value = text; }
+
+  function selectVertical(v, el) {
+    selectedVertical = v;
+    document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+  }
+
+  async function runPromptOptimize() {
+    const prompt = document.getElementById('prompt-input').value.trim();
+    if (!prompt) { alert('Please enter a prompt first.'); return; }
+    setLoading('prompt-btn', true);
+    document.getElementById('prompt-metrics').innerHTML = '';
+    document.getElementById('prompt-result').classList.remove('show');
+    try {
+      const res = await fetch('/api/prompt/optimize', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt }),
+      });
+      const data = await res.json();
+      if (data.error) { alert('Error: ' + data.error); return; }
+      document.getElementById('prompt-metrics').innerHTML = `
+        <div class="metric green"><span class="val">${data.percentReduction}%</span> token reduction</div>
+        <div class="metric"><span class="val">${data.originalEstimatedTokens}</span> original tokens</div>
+        <div class="metric"><span class="val">${data.optimizedEstimatedTokens}</span> optimized tokens</div>
+        <div class="metric purple"><span class="val">${data.matchedSite ?? '—'}</span> matched site</div>
+        <div class="metric"><span class="val">${data.strategy ?? '—'}</span> strategy</div>
+      `;
+      document.getElementById('prompt-pre').textContent = JSON.stringify(data, null, 2);
+      document.getElementById('prompt-result').classList.add('show');
+    } catch (e) { alert('Network error: ' + e.message); }
+    finally { setLoading('prompt-btn', false); }
+  }
+
+  async function runSuggest() {
+    const intent = document.getElementById('suggest-input').value.trim();
+    if (!intent) { alert('Please enter an intent first.'); return; }
+    const limit = Number(document.getElementById('suggest-limit').value);
+    setLoading('suggest-btn', true);
+    document.getElementById('suggestion-list').innerHTML = '';
+    const recEl = document.getElementById('suggest-recommended');
+    recEl.style.display = 'none';
+    try {
+      const res = await fetch('/api/suggest', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ intent, limit }),
+      });
+      const data = await res.json();
+      if (data.error) { alert('Error: ' + data.error); return; }
+      if (data.recommendedAction) {
+        recEl.innerHTML = `💡 <strong>Recommended:</strong> ${escHtml(data.recommendedAction)}`;
+        recEl.style.display = 'flex';
+      }
+      const maxScore = Math.max(...(data.suggestions || []).map(s => s.score), 1);
+      document.getElementById('suggestion-list').innerHTML = (data.suggestions || []).map((s, i) => `
+        <div class="suggestion-card">
+          <div class="rank-badge">${i + 1}</div>
+          <div class="suggestion-info">
+            <div class="suggestion-name">
+              <span>${escHtml(s.command)}</span>
+              <span class="site-tag">${escHtml(s.site)}</span>
+              ${s.strategy ? `<span class="site-tag">${escHtml(s.strategy)}</span>` : ''}
+            </div>
+            <div class="suggestion-desc">${escHtml(s.description ?? '')}</div>
+            <div class="score-bar-wrap">
+              <div class="score-bar"><div class="score-fill" style="width:${Math.round((s.score/maxScore)*100)}%"></div></div>
+              <div class="score-num">score: ${s.score}</div>
+            </div>
+            ${s.exampleInvocation ? `<div class="install-cmd" style="margin-top:.5rem">
+              <span>${escHtml(s.exampleInvocation)}</span>
+              <button class="copy-btn" onclick="navigator.clipboard.writeText(${JSON.stringify(s.exampleInvocation)})">Copy</button>
+            </div>` : ''}
+          </div>
+        </div>`).join('');
+    } catch (e) { alert('Network error: ' + e.message); }
+    finally { setLoading('suggest-btn', false); }
+  }
+
+  async function runIdea() {
+    setLoading('idea-btn', true);
+    const gridEl = document.getElementById('idea-grid');
+    gridEl.innerHTML = '';
+    try {
+      const res = await fetch(`/api/idea/${selectedVertical}`);
+      const data = await res.json();
+      if (data.error) { alert('Error: ' + data.error); return; }
+      const ideas = Array.isArray(data) ? data : [data];
+      gridEl.innerHTML = ideas.map(idea => `
+        <div class="idea-card">
+          <div class="idea-title">${escHtml(idea.title)}</div>
+          <div class="idea-summary">${escHtml(idea.summary)}</div>
+          ${idea.blueprint ? `<div class="idea-layers">
+            <div class="idea-layer"><div class="layer-num">0</div><div class="layer-text">${escHtml(idea.blueprint.layer0Explore)}</div></div>
+            <div class="idea-layer"><div class="layer-num">1</div><div class="layer-text">${escHtml(idea.blueprint.layer1Sitemap)}</div></div>
+            <div class="idea-layer"><div class="layer-num">2</div><div class="layer-text">${escHtml(idea.blueprint.layer2Adapter)}</div></div>
+            <div class="idea-layer"><div class="layer-num">3</div><div class="layer-text">${escHtml(idea.blueprint.layer3Cli)}</div></div>
+          </div>` : ''}
+          ${idea.sampleCommand ? `<div class="idea-cmd">${escHtml(idea.sampleCommand)}</div>` : ''}
+        </div>`).join('');
+    } catch (e) { alert('Network error: ' + e.message); }
+    finally { setLoading('idea-btn', false); }
+  }
+
+  function escHtml(str) {
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  document.querySelector('.tab:nth-child(3)').addEventListener('click', () => {
+    if (!document.getElementById('idea-grid').children.length) runIdea();
+  });
+</script>
+</body>
+</html>
