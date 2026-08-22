@@ -71,7 +71,10 @@ function executeAction(prompt: string) {
     let targetUrl = '';
     let siteName = rawTarget;
 
-    if (rawTarget.includes('flipkart')) {
+    if (rawTarget.includes('instagram') || rawTarget.includes('ig') || rawTarget.includes('insta')) {
+      targetUrl = 'https://www.instagram.com';
+      siteName = 'Instagram';
+    } else if (rawTarget.includes('flipkart')) {
       targetUrl = 'https://www.flipkart.com';
       siteName = 'Flipkart';
     } else if (rawTarget.includes('amazon')) {
