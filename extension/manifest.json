@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "SLAB AI Voice Browser Agent",
+  "name": "SLAB — Self-Learning Agent Browser",
   "version": "1.0.0",
-  "description": "Autonomous voice & text AI browser agent powered by Webcmd and SLAB 4-layer architecture. Explore, learn, and automate the web.",
+  "description": "Voice- and gaze-controlled autonomous browser agent with offline extractive summarization, per-site habit memory, and 98% token reduction.",
   "permissions": [
     "activeTab",
     "tabs",
@@ -13,23 +13,44 @@
   "host_permissions": [
     "<all_urls>"
   ],
+  "background": {
+    "service_worker": "background/service-worker.js",
+    "type": "module"
+  },
+  "options_page": "options/options.html",
   "action": {
-    "default_popup": "popup.html",
-    "default_title": "SLAB AI Voice Browser Agent",
+    "default_popup": "popup/popup.html",
+    "default_title": "SLAB AI Voice & Gaze Agent",
     "default_icon": {
       "16": "icons/icon16.png",
       "48": "icons/icon48.png",
       "128": "icons/icon128.png"
     }
   },
-  "background": {
-    "service_worker": "background.js"
-  },
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["content.js"],
-      "run_at": "document_idle"
+      "js": ["lib/webgazer.js", "content/gaze-main-world.js"],
+      "run_at": "document_start",
+      "world": "MAIN"
+    },
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content/content-script.js"],
+      "css": ["content/content-styles.css"],
+      "run_at": "document_idle",
+      "world": "ISOLATED"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "onboarding/onboarding.html",
+        "options/options.html",
+        "permission.html",
+        "lib/webgazer.js"
+      ],
+      "matches": ["<all_urls>"]
     }
   ],
   "icons": {
@@ -43,7 +64,14 @@
         "default": "Ctrl+Shift+U",
         "mac": "Command+Shift+U"
       },
-      "description": "Open SLAB AI Voice Agent"
+      "description": "Open SLAB Agent Popup"
+    },
+    "open_command_palette": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+K",
+        "mac": "Command+Shift+K"
+      },
+      "description": "Open SLAB In-Page Command Palette"
     }
   }
 }

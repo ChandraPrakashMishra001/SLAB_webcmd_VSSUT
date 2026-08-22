@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Welcome to SLAB — 60-Second Tour</title>
+  <link rel="stylesheet" href="onboarding.css">
+</head>
+<body>
+  <div class="onboarding-card">
+    <div class="header">
+      <div class="logo">⚡</div>
+      <div>
+        <h1>SLAB Agent</h1>
+        <p class="subtitle">Self-Learning Agent Browser · Hackathon Edition</p>
+      </div>
+    </div>
+
+    <!-- Step Carousel -->
+    <div class="steps-container">
+      <!-- Step 1 -->
+      <div class="step-card active" data-step="1">
+        <div class="step-icon">🔮</div>
+        <h2>Floating Orb & Voice Navigation</h2>
+        <p>
+          SLAB attaches a lightweight, non-intrusive floating Orb to the bottom-right of every allowed web page.
+          Say <strong>"scroll down"</strong>, <strong>"go back"</strong>, or <strong>"click search"</strong> for hands-free browsing.
+        </p>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="step-card" data-step="2">
+        <div class="step-icon">⌨️</div>
+        <h2>Command Palette (Ctrl + Shift + K)</h2>
+        <p>
+          Press <kbd>Ctrl+Shift+K</kbd> (or <kbd>Cmd+Shift+K</kbd> on Mac) on any page to summon the spotlight command palette.
+          Filter, auto-complete, and execute commands at deterministic speed.
+        </p>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="step-card" data-step="3">
+        <div class="step-icon">✨</div>
+        <h2>100% Offline Saliency Summarizer</h2>
+        <p>
+          Say <strong>"summarize page"</strong> to extract key takeaways and bullet points.
+          The built-in Token Optimizer strips clutter and delivers up to <strong>98% token reduction</strong> completely offline!
+        </p>
+      </div>
+
+      <!-- Step 4 -->
+      <div class="step-card" data-step="4">
+        <div class="step-icon">👁️</div>
+        <h2>Adaptive Reading Gaze Scroll</h2>
+        <p>
+          Equipped with WebGazer webcam eye-tracking. When your eyes reach the bottom of the viewport,
+          the page gently scrolls down matching your natural reading speed.
+        </p>
+      </div>
+
+      <!-- Step 5 -->
+      <div class="step-card" data-step="5">
+        <div class="step-icon">🛡️</div>
+        <h2>Habit Memory & Access Gating</h2>
+        <p>
+          SLAB automatically remembers which commands you use on which websites and suggests them.
+          High-risk clicks pause for a 6-second confirmation so you're always in complete control.
+        </p>
+      </div>
+    </div>
+
+    <!-- Indicator Dots -->
+    <div class="dots-row">
+      <span class="dot active" data-dot="1"></span>
+      <span class="dot" data-dot="2"></span>
+      <span class="dot" data-dot="3"></span>
+      <span class="dot" data-dot="4"></span>
+      <span class="dot" data-dot="5"></span>
+    </div>
+
+    <!-- Navigation Buttons -->
+    <div class="btn-row">
+      <button class="btn btn-secondary" id="btnPrev" style="visibility:hidden;">Back</button>
+      <button class="btn btn-primary" id="btnNext">Next →</button>
+      <button class="btn btn-success" id="btnFinish" style="display:none;">Finish & Start Browsing 🚀</button>
+    </div>
+  </div>
+
+  <script src="onboarding.js"></script>
+</body>
+</html>

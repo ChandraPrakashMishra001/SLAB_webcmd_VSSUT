@@ -1,0 +1,11 @@
+/* Host document styles - completely isolated from page */
+slab-agent-root {
+  display: block !important;
+  position: fixed !important;
+  z-index: 2147483647 !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 0 !important;
+  height: 0 !important;
+  pointer-events: none !important;
+}

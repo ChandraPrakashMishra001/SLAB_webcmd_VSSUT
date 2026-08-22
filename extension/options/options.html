@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SLAB Agent — Settings & Memory</title>
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <div class="options-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="logo">⚡</div>
+        <div>
+          <h2>SLAB Agent</h2>
+          <small>Settings & Memory</small>
+        </div>
+      </div>
+      <nav class="nav-links">
+        <button class="nav-btn active" data-tab="tabBackend">🤖 Backend & Model</button>
+        <button class="nav-btn" data-tab="tabAccess">🛡️ Access Control</button>
+        <button class="nav-btn" data-tab="tabMemory">🧠 Learned Memory</button>
+        <button class="nav-btn" data-tab="tabVoice">🎙️ Voice & Gaze</button>
+        <button class="nav-btn" data-tab="tabAbout">ℹ️ About & Demo</button>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Backend & Model -->
+      <section id="tabBackend" class="tab-pane active">
+        <h1>Backend & Model Configuration</h1>
+        <p class="subtitle">Choose between 100% offline local extractive engine or remote Webcmd / AI models.</p>
+
+        <div class="card">
+          <h3>Execution Engine</h3>
+          <div class="radio-group">
+            <label class="radio-card">
+              <input type="radio" name="engine" value="local" checked id="optLocal">
+              <div>
+                <strong>Offline Local Summarizer (Recommended)</strong>
+                <p>Pure on-device extractive ranking. Zero latency, zero external API calls, 100% offline.</p>
+              </div>
+            </label>
+            <label class="radio-card">
+              <input type="radio" name="engine" value="remote" id="optRemote">
+              <div>
+                <strong>Remote Webcmd / AI Backend</strong>
+                <p>Calls Webcmd CLI endpoint or Gemini/OpenAI models with structured JSON schemas.</p>
+              </div>
+            </label>
+          </div>
+
+          <div class="form-group" id="remoteConfigBox">
+            <label>Remote Endpoint URL</label>
+            <input type="text" id="cfgRemoteEndpoint" class="input" placeholder="https://slab-webcmd-vssut.vercel.app/api/execute">
+            <label>API Key / Auth Token (Optional)</label>
+            <input type="password" id="cfgApiKey" class="input" placeholder="sk-...">
+          </div>
+        </div>
+      </section>
+
+      <!-- Access Control -->
+      <section id="tabAccess" class="tab-pane">
+        <h1>Access Control & Domain Filter</h1>
+        <p class="subtitle">Control which websites the SLAB Agent is permitted to inject into and explore.</p>
+
+        <div class="card">
+          <h3>Filter Mode</h3>
+          <div class="radio-group">
+            <label class="radio-card">
+              <input type="radio" name="accessMode" value="blacklist" checked id="optBlacklist">
+              <div>
+                <strong>Blacklist Mode (Allow everywhere except listed)</strong>
+                <p>Injects on all websites except high-security or banking portals.</p>
+              </div>
+            </label>
+            <label class="radio-card">
+              <input type="radio" name="accessMode" value="whitelist" id="optWhitelist">
+              <div>
+                <strong>Whitelist Mode (Strict allow-only)</strong>
+                <p>Only activates on explicitly approved websites.</p>
+              </div>
+            </label>
+          </div>
+
+          <div class="form-group">
+            <label id="lblDomainList">Blacklisted Domains</label>
+            <div class="add-row">
+              <input type="text" id="txtNewDomain" class="input" placeholder="e.g. example.com">
+              <button class="btn btn-secondary" id="btnAddDomain">Add Domain</button>
+            </div>
+            <ul class="domain-list" id="domainList"></ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Learned Habit Memory -->
+      <section id="tabMemory" class="tab-pane">
+        <h1>Learned Site Memory</h1>
+        <p class="subtitle">Inspect what commands the agent has learned per domain with 1-click forget.</p>
+
+        <div class="card">
+          <div class="card-header-row">
+            <h3>Per-Site Habit Database</h3>
+            <button class="btn btn-danger" id="btnClearAllMemory">Clear All Memory</button>
+          </div>
+          <div id="memoryContainer" class="memory-grid"></div>
+        </div>
+      </section>
+
+      <!-- Voice & Gaze -->
+      <section id="tabVoice" class="tab-pane">
+        <h1>Voice & Eye-Tracking Tuning</h1>
+        <p class="subtitle">Fine-tune speech rate, confirmation gating, and reading-speed adaptive scroll.</p>
+
+        <div class="card">
+          <div class="switch-row">
+            <div>
+              <strong>Confirmation Gating</strong>
+              <p>Show 6-second auto-canceling confirmation modal before executing clicks.</p>
+            </div>
+            <input type="checkbox" id="cfgConfirmActions" checked>
+          </div>
+
+          <div class="switch-row">
+            <div>
+              <strong>Adaptive Reading Gaze Scroll</strong>
+              <p>Gently scroll down when your eyes reach the bottom of the viewport.</p>
+            </div>
+            <input type="checkbox" id="cfgReadingSpeedScroll" checked>
+          </div>
+
+          <div class="switch-row">
+            <div>
+              <strong>Auto-Speak Summaries</strong>
+              <p>Read summary takeaways aloud via Web Speech synthesis.</p>
+            </div>
+            <input type="checkbox" id="cfgAutoSpeak" checked>
+          </div>
+
+          <div class="form-group" style="margin-top: 16px;">
+            <label>Speech Rate (<span id="valSpeechRate">1.0x</span>)</label>
+            <input type="range" id="cfgSpeechRate" min="0.7" max="1.5" step="0.1" value="1.0" class="range">
+          </div>
+        </div>
+      </section>
+
+      <!-- About & Demo -->
+      <section id="tabAbout" class="tab-pane">
+        <h1>SLAB Agent Tour & Demo</h1>
+        <p class="subtitle">Self-Learning Agent Browser (Hackathon 2026 Edition)</p>
+
+        <div class="card">
+          <h3>Quick Links</h3>
+          <p>Replay the 60-second tour or inspect source adapters.</p>
+          <div class="btn-row" style="margin-top: 12px;">
+            <button class="btn btn-primary" id="btnReplayTour">🚀 Replay 60-Sec Onboarding Tour</button>
+            <a href="https://slab-webcmd-vssut.vercel.app" target="_blank" class="btn btn-secondary">🌐 Live Website & Webcmd CLI</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- Save Bar -->
+      <div class="save-bar">
+        <span id="saveStatus" class="save-status">All changes saved automatically.</span>
+        <button class="btn btn-primary" id="btnSaveSettings">Save All Settings</button>
+      </div>
+    </main>
+  </div>
+
+  <script type="module" src="options.js"></script>
+</body>
+</html>

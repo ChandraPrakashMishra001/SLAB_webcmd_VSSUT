@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SLAB AI Voice Agent</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="popup-container">
+    <!-- Header -->
+    <header class="header">
+      <div class="brand">
+        <div class="logo">⚡</div>
+        <div>
+          <h1>SLAB Agent</h1>
+          <div class="status-row">
+            <span class="status-dot"></span>
+            <span class="status-text" id="statusText">Agent Online</span>
+          </div>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button class="icon-btn" id="btnOpenOptions" title="Settings & Memory">⚙️</button>
+      </div>
+    </header>
+
+    <!-- Active Tab Context -->
+    <div class="tab-context-banner">
+      <span class="tab-icon">🌐</span>
+      <span class="tab-title" id="activeTabTitle">Loading active tab...</span>
+    </div>
+
+    <!-- Quick Toggles -->
+    <div class="quick-toggles">
+      <button class="toggle-btn" id="btnVoiceToggle">
+        <span class="icon">🎙️</span>
+        <span>Voice Mic</span>
+      </button>
+      <button class="toggle-btn" id="btnGazeToggle">
+        <span class="icon">👁️</span>
+        <span>Eye Scroll</span>
+      </button>
+      <button class="toggle-btn" id="btnFocusToggle">
+        <span class="icon">🎯</span>
+        <span>Focus Mode</span>
+      </button>
+    </div>
+
+    <!-- Site Habit Suggestions -->
+    <div class="section-box">
+      <div class="section-title">Learned Site Habits</div>
+      <div class="chips-row" id="siteHabitsChips">
+        <button class="chip" data-cmd="summarize page">✨ summarize page</button>
+        <button class="chip" data-cmd="scroll down">📜 scroll down</button>
+        <button class="chip" data-cmd="focus mode on">🎯 focus mode</button>
+      </div>
+    </div>
+
+    <!-- Chat & Command History Stream -->
+    <div class="chat-area" id="chatArea">
+      <div class="message system-msg">
+        <div class="msg-avatar">⚡</div>
+        <div class="msg-body">SLAB Agent active. Voice navigation, offline summarization & habit memory ready.</div>
+      </div>
+    </div>
+
+    <!-- Command Input Bar -->
+    <div class="input-bar">
+      <button class="mic-btn" id="btnVoiceInput" title="Hold or click to speak">🎙️</button>
+      <input type="text" id="txtInput" class="text-input" placeholder="Type or speak a command (e.g. 'summarize page', 'scroll down')..." />
+      <button class="send-btn" id="btnSend">➤</button>
+    </div>
+
+    <!-- Footer Links -->
+    <footer class="footer">
+      <a id="lnkOnboarding">60-Sec Tour</a>
+      <span>·</span>
+      <a id="lnkOptions">Settings & Memory</a>
+      <span>·</span>
+      <a href="https://slab-webcmd-vssut.vercel.app" target="_blank">Webcmd CLI</a>
+    </footer>
+  </div>
+
+  <script type="module" src="popup.js"></script>
+</body>
+</html>
