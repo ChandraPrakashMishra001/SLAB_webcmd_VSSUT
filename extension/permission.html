@@ -98,23 +98,6 @@
     <div class="status" id="statusMsg"></div>
   </div>
 
-  <script>
-    document.getElementById('btnAllow').addEventListener('click', async () => {
-      const status = document.getElementById('statusMsg');
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        // Stop the tracks immediately after obtaining permission
-        stream.getTracks().forEach(track => track.stop());
-        status.className = 'status success';
-        status.textContent = '✅ Microphone permission granted! Closing this tab in 2 seconds...';
-        setTimeout(() => {
-          window.close();
-        }, 2000);
-      } catch (err) {
-        status.className = 'status error';
-        status.textContent = '❌ Access denied: ' + err.message + '. Please allow mic access in your browser settings.';
-      }
-    });
-  </script>
+  <script src="permission.js"></script>
 </body>
 </html>

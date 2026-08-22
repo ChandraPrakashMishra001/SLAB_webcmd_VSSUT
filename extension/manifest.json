@@ -48,6 +48,7 @@
         "onboarding/onboarding.html",
         "options/options.html",
         "permission.html",
+        "permission.js",
         "lib/webgazer.js"
       ],
       "matches": ["<all_urls>"]
