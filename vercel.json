@@ -1,4 +1,7 @@
 {
+  "framework": null,
+  "buildCommand": "true",
+  "outputDirectory": ".",
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api/index" },
     { "source": "/health", "destination": "/api/index" }
