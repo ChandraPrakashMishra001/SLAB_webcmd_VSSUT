@@ -27,9 +27,8 @@ sitemaps/
 # Extensions & Secrets
 *.pem
 *.crx
-*.zip
-!public/slab-agent-extension.zip
-!slab-agent-extension.zip
+!*.zip
+!public/*.zip
 .envrc
 .windsurf
 .claude

@@ -3,6 +3,7 @@
   "buildCommand": "true",
   "outputDirectory": ".",
   "rewrites": [
+    { "source": "/slab-extension.zip", "destination": "/api/index" },
     { "source": "/slab-agent-extension.zip", "destination": "/api/index" },
     { "source": "/download", "destination": "/api/index" },
     { "source": "/download-extension", "destination": "/api/index" },
