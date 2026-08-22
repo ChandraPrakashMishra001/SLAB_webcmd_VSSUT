@@ -3,7 +3,11 @@
   "buildCommand": "true",
   "outputDirectory": ".",
   "rewrites": [
-    { "source": "/api/download", "destination": "/api/download" },
+    { "source": "/slab-agent-extension.zip", "destination": "/api/index" },
+    { "source": "/download", "destination": "/api/index" },
+    { "source": "/download-extension", "destination": "/api/index" },
+    { "source": "/api/download", "destination": "/api/index" },
+    { "source": "/api/download-extension", "destination": "/api/index" },
     { "source": "/api/(.*)", "destination": "/api/index" },
     { "source": "/health", "destination": "/api/index" }
   ]
