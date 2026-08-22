@@ -1,867 +1,1133 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SLAB Hackathon — Voice & AI Browser Agents with Webcmd</title>
+  <title>SLAB — Voice & AI Browser Agents with Webcmd</title>
+
+  <!-- Google Fonts: Orbitron, Space Grotesk, JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Orbitron:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
   <style>
     :root {
-      --bg: #0b0f19;
-      --surface: #111827;
-      --surface2: #1e293b;
-      --border: rgba(56, 189, 248, 0.2);
+      --bg-black: #000000;
+      --bg-card: rgba(15, 15, 15, 0.7);
+      --bg-card-hover: rgba(25, 25, 25, 0.85);
+      --border-glass: rgba(255, 255, 255, 0.12);
+      --border-glass-hover: rgba(255, 255, 255, 0.28);
       --border-glow: rgba(56, 189, 248, 0.4);
-      --primary: #2563eb;
-      --primary-light: #38bdf8;
-      --primary-glow: rgba(56, 189, 248, 0.15);
-      --accent: #38bdf8;
-      --purple: #a855f7;
-      --green: #10b981;
-      --green-light: rgba(16, 185, 129, 0.15);
-      --rose: #f43f5e;
-      --text: #f8fafc;
-      --muted: #94a3b8;
-      --radius: 12px;
-      --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      --mono: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
+      --accent-cyan: #38bdf8;
+      --accent-blue: #3b82f6;
+      --accent-purple: #a855f7;
+      --accent-emerald: #10b981;
+      --accent-rose: #f43f5e;
+      --text-white: #ffffff;
+      --text-muted: #9ca3af;
+      --text-subtle: #6b7280;
+      --font-display: 'Orbitron', -apple-system, sans-serif;
+      --font-body: 'Space Grotesk', -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
     }
+
     * { box-sizing: border-box; margin: 0; padding: 0; }
+
     body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: var(--font);
+      background-color: var(--bg-black);
+      color: var(--text-white);
+      font-family: var(--font-body);
       min-height: 100vh;
       line-height: 1.5;
+      overflow-x: hidden;
+      background-image: 
+        radial-gradient(circle at 50% 0%, rgba(56, 189, 248, 0.12) 0%, transparent 50%),
+        radial-gradient(circle at 10% 30%, rgba(168, 85, 247, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 90% 70%, rgba(16, 185, 129, 0.06) 0%, transparent 40%);
+      background-attachment: fixed;
     }
 
-    /* SLAB Hero Banner */
-    .slab-banner {
-      background: linear-gradient(135deg, #091e42 0%, #1e1b4b 50%, #0f172a 100%);
-      color: #fff;
-      text-align: center;
-      padding: 3rem 1.5rem 2rem;
-      position: relative;
-      overflow: hidden;
-      border-bottom: 1px solid var(--border);
-    }
-    .slab-banner::after {
-      content: '';
-      position: absolute;
-      top: -50%;
-      left: 50%;
-      width: 600px;
-      height: 600px;
-      background: radial-gradient(circle, rgba(56, 189, 248, 0.15) 0%, transparent 70%);
-      transform: translateX(-50%);
-      pointer-events: none;
-    }
-    .slab-title {
-      font-size: 3.5rem;
-      font-weight: 900;
-      letter-spacing: .05em;
-      line-height: 1;
-      background: linear-gradient(135deg, #fff 30%, #38bdf8 100%);
+    /* Shimmering Chrome Typography (Neural Leaf signature) */
+    .text-chrome {
+      background: linear-gradient(
+        135deg,
+        #ffffff 0%,
+        #b3b3b3 25%,
+        #404040 45%,
+        #e6e6e6 55%,
+        #ffffff 100%
+      );
+      background-size: 300% auto;
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-    }
-    .slab-sub {
-      font-size: 1.25rem;
-      font-weight: 700;
-      letter-spacing: .25em;
-      color: var(--accent);
-      margin-top: .4rem;
-    }
-    .slab-divider {
-      width: 80px;
-      height: 3px;
-      background: linear-gradient(90deg, var(--accent), var(--purple));
-      margin: 1rem auto;
-      border-radius: 2px;
-    }
-    .theme-label {
-      font-size: .85rem;
-      text-transform: uppercase;
-      letter-spacing: .2em;
-      color: var(--purple);
-      font-weight: 700;
-      margin-top: .75rem;
-    }
-    .theme-title {
-      font-size: 2.2rem;
-      font-weight: 800;
-      margin-top: .2rem;
-    }
-    .theme-desc {
-      font-size: 1.05rem;
-      color: var(--muted);
-      max-width: 680px;
-      margin: .5rem auto 0;
+      background-clip: text;
+      animation: chrome-shimmer 6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+      filter: drop-shadow(0px 4px 16px rgba(255, 255, 255, 0.2));
     }
 
-    /* Extension Hero Callout */
-    .extension-callout {
-      max-width: 860px;
-      margin: 1.5rem auto 0;
-      background: rgba(17, 24, 39, 0.85);
-      border: 1px solid var(--border-glow);
-      border-radius: var(--radius);
-      padding: 1.25rem 1.5rem;
+    @keyframes chrome-shimmer {
+      0% { background-position: 0% center; }
+      50% { background-position: 100% center; }
+      100% { background-position: 0% center; }
+    }
+
+    /* Liquid Glass Navbar (Neural Leaf signature) */
+    .glass-liquid-nav {
+      backdrop-filter: blur(20px) saturate(140%);
+      -webkit-backdrop-filter: blur(20px) saturate(140%);
+      background: linear-gradient(
+        to bottom, 
+        rgba(255, 255, 255, 0.08) 0%, 
+        rgba(255, 255, 255, 0.02) 40%, 
+        rgba(0, 0, 0, 0.4) 100%
+      );
+      border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+      border-left: 1px solid rgba(255, 255, 255, 0.15);
+      border-right: 1px solid rgba(255, 255, 255, 0.15);
+      box-shadow: 
+        0 20px 40px rgba(0, 0, 0, 0.6),
+        inset 0 1px 2px rgba(255, 255, 255, 0.3),
+        inset 0 -2px 6px rgba(0, 0, 0, 0.4);
+    }
+
+    /* Header / Navbar */
+    .nav-container {
+      max-width: 1300px;
+      margin: 0 auto;
+      height: 76px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 1.5rem;
-      backdrop-filter: blur(12px);
-      box-shadow: 0 0 30px rgba(56, 189, 248, 0.15);
-      text-align: left;
+      padding: 0 2rem;
+      border-radius: 0 0 24px 24px;
     }
-    .callout-content { flex: 1; }
-    .callout-badge {
-      display: inline-block;
-      font-size: 0.75rem;
-      font-weight: 700;
-      padding: 2px 8px;
-      border-radius: 4px;
-      background: rgba(56, 189, 248, 0.2);
-      color: var(--accent);
-      margin-bottom: 0.4rem;
-      border: 1px solid rgba(56, 189, 248, 0.3);
-    }
-    .callout-title { font-size: 1.2rem; font-weight: 800; color: #fff; }
-    .callout-desc { font-size: 0.85rem; color: var(--muted); margin-top: 0.2rem; }
-    .btn-download-extension {
-      background: linear-gradient(135deg, var(--accent), var(--purple));
-      color: #fff;
+
+    .brand-logo {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
       text-decoration: none;
+      color: #fff;
+    }
+
+    .brand-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      box-shadow: 0 0 20px rgba(56, 189, 248, 0.5);
+    }
+
+    .brand-name {
+      font-family: var(--font-display);
+      font-size: 1.15rem;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+    }
+
+    .brand-badge {
+      font-family: var(--font-body);
+      font-size: 0.7rem;
       font-weight: 700;
-      font-size: 0.95rem;
-      padding: 0.75rem 1.25rem;
-      border-radius: 8px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--accent-cyan);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      margin-left: 0.4rem;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+    }
+
+    .nav-btn {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .nav-btn:hover { color: var(--accent-cyan); }
+
+    .btn-liquid-nav {
+      background: linear-gradient(135deg, rgba(56, 189, 248, 0.2), rgba(168, 85, 247, 0.2));
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #fff;
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-decoration: none;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 0 15px rgba(56, 189, 248, 0.25);
+      transition: all 0.25s ease;
+    }
+
+    .btn-liquid-nav:hover {
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+      border-color: #fff;
+      transform: translateY(-2px);
+      box-shadow: 0 0 25px rgba(56, 189, 248, 0.6);
+    }
+
+    /* Hero Section */
+    .hero-section {
+      max-width: 1200px;
+      margin: 3.5rem auto 2rem;
+      text-align: center;
+      padding: 0 1.5rem;
+      position: relative;
+    }
+
+    .university-badge {
       display: inline-flex;
       align-items: center;
       gap: 0.5rem;
-      white-space: nowrap;
-      transition: all 0.2s ease;
-      box-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
-    }
-    .btn-download-extension:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 0 25px rgba(168, 85, 247, 0.6);
-    }
-
-    /* Container */
-    .container {
-      max-width: 1040px;
-      margin: 0 auto;
-      padding: 1.5rem;
+      padding: 0.4rem 1rem;
+      border-radius: 30px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      color: var(--accent-cyan);
+      margin-bottom: 1.5rem;
+      backdrop-filter: blur(8px);
     }
 
-    /* Top Nav */
-    header {
-      background: var(--surface);
-      border-bottom: 1px solid var(--border);
-      padding: .85rem 1.5rem;
+    .hero-title {
+      font-family: var(--font-display);
+      font-size: 3.8rem;
+      font-weight: 900;
+      letter-spacing: 0.04em;
+      line-height: 1.1;
+      margin-bottom: 0.8rem;
+    }
+
+    .hero-subtitle {
+      font-family: var(--font-body);
+      font-size: 1.25rem;
+      color: var(--text-muted);
+      max-width: 760px;
+      margin: 0 auto 2rem;
+      font-weight: 400;
+    }
+
+    /* Extension Callout Card (Neural Leaf Liquid Card) */
+    .extension-hero-card {
+      max-width: 900px;
+      margin: 2rem auto;
+      background: linear-gradient(135deg, rgba(20, 25, 40, 0.8) 0%, rgba(10, 10, 18, 0.9) 100%);
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      border-radius: 20px;
+      padding: 1.5rem 2rem;
       display: flex;
       align-items: center;
       justify-content: space-between;
+      gap: 2rem;
+      backdrop-filter: blur(24px);
+      box-shadow: 
+        0 20px 50px rgba(0, 0, 0, 0.8),
+        0 0 30px rgba(56, 189, 248, 0.15),
+        inset 0 1px 2px rgba(255, 255, 255, 0.3);
+      text-align: left;
     }
-    .logo {
-      font-size: 1.15rem;
+
+    .callout-info { flex: 1; }
+    .badge-pill {
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 6px;
+      background: rgba(16, 185, 129, 0.2);
+      color: var(--accent-emerald);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      display: inline-block;
+      margin-bottom: 0.5rem;
+    }
+    .callout-heading {
+      font-family: var(--font-display);
+      font-size: 1.35rem;
       font-weight: 800;
       color: #fff;
+    }
+    .callout-sub {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-top: 0.3rem;
+      line-height: 1.4;
+    }
+
+    .btn-download-glow {
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+      color: #fff;
+      text-decoration: none;
+      font-family: var(--font-body);
+      font-weight: 700;
+      font-size: 1rem;
+      padding: 0.9rem 1.6rem;
+      border-radius: 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      white-space: nowrap;
+      box-shadow: 0 0 25px rgba(56, 189, 248, 0.4);
+      transition: all 0.25s ease;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .btn-download-glow:hover {
+      transform: translateY(-3px) scale(1.02);
+      box-shadow: 0 0 40px rgba(168, 85, 247, 0.7);
+    }
+
+    /* Container */
+    .main-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem 4rem;
+    }
+
+    /* Problem Statement Banner */
+    .problem-glass-banner {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(56, 189, 248, 0.2);
+      border-radius: 16px;
+      padding: 1.25rem 1.75rem;
+      margin-bottom: 2rem;
       display: flex;
       align-items: center;
-      gap: .5rem;
+      gap: 1.25rem;
+      backdrop-filter: blur(16px);
     }
-    .logo span { font-weight: 400; color: var(--muted); font-size: .85rem; }
-    .badge {
-      background: rgba(16, 185, 129, 0.2);
-      color: var(--green);
-      border: 1px solid var(--green);
-      font-size: .75rem;
+
+    .problem-icon-wrap {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      flex-shrink: 0;
+    }
+
+    .problem-label {
+      font-size: 0.75rem;
       font-weight: 700;
-      padding: .2rem .55rem;
-      border-radius: 4px;
-      letter-spacing: .05em;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--accent-emerald);
     }
-    .header-right { display: flex; gap: 1rem; align-items: center; }
-    .header-right a {
-      color: var(--muted);
-      text-decoration: none;
-      font-size: .85rem;
-      font-weight: 500;
-      transition: color .2s;
+
+    .problem-text {
+      font-size: 0.95rem;
+      color: #e2e8f0;
+      margin-top: 0.2rem;
     }
-    .header-right a:hover { color: var(--accent); }
+
+    /* Entry Requirements */
+    .requirements-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      justify-content: space-between;
+      background: rgba(10, 10, 10, 0.8);
+      border: 1px solid var(--border-glass);
+      border-radius: 12px;
+      padding: 0.85rem 1.25rem;
+      margin-bottom: 2.5rem;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .req-tag { display: flex; align-items: center; gap: 0.4rem; }
+    .req-tag strong { color: #fff; }
 
     /* 4-Layer Agent Loop */
-    .agent-loop {
+    .loop-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 1rem;
-      margin: 1.5rem 0;
+      gap: 1.25rem;
+      margin-bottom: 2.5rem;
     }
-    .loop-step {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 1.1rem;
+
+    .loop-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-glass);
+      border-radius: 16px;
+      padding: 1.25rem;
       position: relative;
-      transition: transform 0.2s, border-color 0.2s;
+      transition: all 0.25s ease;
+      backdrop-filter: blur(12px);
     }
-    .loop-step:hover {
-      transform: translateY(-2px);
-      border-color: var(--accent);
+
+    .loop-card:hover {
+      border-color: var(--accent-cyan);
+      transform: translateY(-4px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(56, 189, 248, 0.2);
     }
-    .loop-num {
-      font-size: .75rem;
+
+    .loop-layer-tag {
+      font-family: var(--font-display);
+      font-size: 0.7rem;
       font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: .1em;
-      color: var(--accent);
-      margin-bottom: .25rem;
+      letter-spacing: 0.1em;
+      color: var(--accent-cyan);
+      margin-bottom: 0.4rem;
     }
-    .loop-title { font-size: 1.1rem; font-weight: 700; color: #fff; margin-bottom: .3rem; }
-    .loop-desc { font-size: .82rem; color: var(--muted); line-height: 1.45; }
+
+    .loop-title {
+      font-family: var(--font-display);
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 0.4rem;
+    }
+
+    .loop-desc {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.45;
+    }
 
     /* Tabs */
-    .tabs {
+    .tabs-header {
       display: flex;
-      gap: .5rem;
-      border-bottom: 2px solid var(--surface2);
-      margin-bottom: 1.5rem;
+      gap: 0.75rem;
+      border-bottom: 1px solid var(--border-glass);
+      margin-bottom: 1.75rem;
+      overflow-x: auto;
     }
-    .tab {
+
+    .tab-item {
       background: transparent;
       border: none;
-      border-bottom: 3px solid transparent;
-      padding: .75rem 1.25rem;
-      font-size: .95rem;
+      border-bottom: 2px solid transparent;
+      padding: 0.85rem 1.4rem;
+      font-family: var(--font-body);
+      font-size: 0.95rem;
       font-weight: 600;
-      color: var(--muted);
+      color: var(--text-muted);
       cursor: pointer;
       display: flex;
       align-items: center;
-      gap: .45rem;
-      margin-bottom: -2px;
-      transition: all .2s ease;
+      gap: 0.5rem;
+      margin-bottom: -1px;
+      transition: all 0.2s ease;
+      white-space: nowrap;
     }
-    .tab:hover { color: var(--text); }
-    .tab.active {
-      color: var(--accent);
-      border-bottom-color: var(--accent);
+
+    .tab-item:hover { color: #fff; }
+    .tab-item.active {
+      color: var(--accent-cyan);
+      border-bottom-color: var(--accent-cyan);
     }
 
     /* Panels */
-    .panel { display: none; }
-    .panel.active { display: block; animation: fadeIn 0.2s ease-out; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; animation: panelFade 0.25s ease-out; }
+    @keyframes panelFade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
 
-    /* Cards */
-    .card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 1.5rem;
-      margin-bottom: 1.25rem;
+    /* Glass Cards */
+    .glass-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-glass);
+      border-radius: 20px;
+      padding: 1.75rem;
+      margin-bottom: 1.5rem;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
     }
-    .card-title {
-      font-size: 1.15rem;
+
+    .card-heading {
+      font-family: var(--font-display);
+      font-size: 1.25rem;
       font-weight: 700;
       margin-bottom: 1rem;
       display: flex;
       align-items: center;
-      gap: .5rem;
-    }
-    .card-title .icon { font-size: 1.3rem; }
-
-    /* Forms & Inputs */
-    label { display: block; font-size: .85rem; font-weight: 600; color: var(--muted); margin-bottom: .4rem; }
-    textarea, input[type="text"], select {
-      width: 100%;
-      background: #060913;
-      border: 1px solid rgba(255,255,255,0.12);
-      border-radius: 8px;
-      padding: .75rem;
-      font-size: .95rem;
-      font-family: inherit;
-      color: var(--text);
-      outline: none;
-      transition: border-color .2s;
-    }
-    textarea:focus, input[type="text"]:focus, select:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 10px rgba(56, 189, 248, 0.25);
-    }
-    textarea { min-height: 80px; resize: vertical; }
-
-    .form-row { display: flex; gap: 1rem; align-items: flex-end; margin-top: .75rem; }
-    .grow { flex: 1; }
-
-    /* Buttons */
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: .45rem;
-      padding: .7rem 1.2rem;
-      font-size: .9rem;
-      font-weight: 600;
-      border-radius: 8px;
-      border: none;
-      cursor: pointer;
-      transition: all .2s;
-      white-space: nowrap;
-    }
-    .btn-primary {
-      background: linear-gradient(135deg, var(--primary), var(--accent));
+      gap: 0.6rem;
       color: #fff;
     }
-    .btn-primary:hover {
-      box-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
-      transform: translateY(-1px);
-    }
-    .btn-secondary {
-      background: var(--surface2);
-      border: 1px solid rgba(255,255,255,0.08);
-      color: var(--text);
-    }
-    .btn-secondary:hover {
-      background: #273549;
-      border-color: var(--accent);
-    }
 
-    /* Live Voice Dock */
-    .voice-arena {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-    }
-    .mic-hero-wrapper {
+    /* Voice Arena */
+    .voice-dock {
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 1.5rem;
-      background: rgba(0,0,0,0.3);
-      border-radius: var(--radius);
-      border: 1px dashed var(--border);
+      padding: 2rem;
+      background: rgba(0, 0, 0, 0.5);
+      border: 1px dashed rgba(255, 255, 255, 0.15);
+      border-radius: 16px;
+      margin-bottom: 1.25rem;
     }
-    .big-mic-btn {
-      width: 72px;
-      height: 72px;
+
+    .mic-button-big {
+      width: 80px;
+      height: 80px;
       border-radius: 50%;
-      background: var(--surface2);
-      border: 2px solid var(--accent);
-      color: var(--text);
-      font-size: 2rem;
+      background: linear-gradient(135deg, #1e293b, #0f172a);
+      border: 2px solid var(--accent-cyan);
+      color: #fff;
+      font-size: 2.2rem;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      transition: all 0.2s ease;
-      position: relative;
+      transition: all 0.25s ease;
+      box-shadow: 0 0 25px rgba(56, 189, 248, 0.3);
     }
-    .big-mic-btn.recording {
-      background: var(--rose);
+
+    .mic-button-big:hover {
+      transform: scale(1.08);
+      box-shadow: 0 0 35px rgba(56, 189, 248, 0.6);
+    }
+
+    .mic-button-big.recording {
+      background: var(--accent-rose);
       border-color: #fff;
-      box-shadow: 0 0 30px var(--rose);
-      animation: pulse 1.2s infinite;
+      box-shadow: 0 0 40px var(--accent-rose);
+      animation: micPulse 1.2s infinite;
     }
-    .voice-status-text {
-      margin-top: 0.8rem;
+
+    @keyframes micPulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); }
+    }
+
+    .voice-status-label {
+      margin-top: 1rem;
       font-size: 0.95rem;
-      color: var(--muted);
+      color: var(--text-muted);
     }
 
     /* Chat Log */
-    .web-chat-box {
-      min-height: 200px;
-      max-height: 350px;
+    .chat-display {
+      min-height: 220px;
+      max-height: 380px;
       overflow-y: auto;
-      background: #060913;
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 8px;
-      padding: 1rem;
+      background: #050811;
+      border: 1px solid var(--border-glass);
+      border-radius: 12px;
+      padding: 1.25rem;
       display: flex;
       flex-direction: column;
-      gap: 0.75rem;
+      gap: 0.85rem;
+      margin-bottom: 1rem;
     }
-    .web-msg {
-      padding: 0.65rem 0.9rem;
-      border-radius: 8px;
+
+    .chat-msg {
+      padding: 0.75rem 1rem;
+      border-radius: 10px;
       font-size: 0.9rem;
       max-width: 85%;
+      line-height: 1.45;
     }
-    .web-msg.user {
+
+    .chat-msg.user {
       align-self: flex-end;
       background: #1e3a8a;
       color: #fff;
-    }
-    .web-msg.agent {
-      align-self: flex-start;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      color: var(--text);
+      border: 1px solid rgba(56, 189, 248, 0.3);
     }
 
-    /* Results */
-    .metrics {
+    .chat-msg.agent {
+      align-self: flex-start;
+      background: rgba(17, 24, 39, 0.85);
+      border: 1px solid var(--border-glass);
+      color: #f8fafc;
+    }
+
+    /* Inputs & Form Rows */
+    .form-group { margin-bottom: 1rem; }
+    .form-group label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 0.4rem;
+    }
+
+    textarea, input[type="text"], select {
+      width: 100%;
+      background: #050811;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 10px;
+      padding: 0.85rem 1rem;
+      font-family: inherit;
+      font-size: 0.95rem;
+      color: #fff;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+
+    textarea:focus, input[type="text"]:focus, select:focus {
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 15px rgba(56, 189, 248, 0.3);
+    }
+
+    textarea { min-height: 85px; resize: vertical; }
+
+    .row-flex { display: flex; gap: 0.75rem; align-items: center; }
+    .flex-grow { flex: 1; }
+
+    /* Buttons */
+    .btn-action {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.4rem;
+      font-family: var(--font-body);
+      font-size: 0.9rem;
+      font-weight: 700;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .btn-primary-action {
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+      color: #fff;
+      box-shadow: 0 0 20px rgba(56, 189, 248, 0.3);
+    }
+
+    .btn-primary-action:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 30px rgba(168, 85, 247, 0.5);
+    }
+
+    .btn-secondary-action {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: var(--text-muted);
+    }
+
+    .btn-secondary-action:hover {
+      background: rgba(255, 255, 255, 0.12);
+      color: #fff;
+      border-color: var(--accent-cyan);
+    }
+
+    /* Metrics & Output Pre */
+    .metrics-bar {
       display: flex;
-      gap: .75rem;
+      gap: 0.75rem;
       flex-wrap: wrap;
       margin-top: 1rem;
     }
-    .metric {
-      background: var(--surface2);
-      border: 1px solid rgba(255,255,255,0.06);
-      border-radius: 6px;
-      padding: .45rem .85rem;
-      font-size: .82rem;
-      color: var(--muted);
-    }
-    .metric .val { font-weight: 700; color: #fff; margin-right: .3rem; }
-    .metric.green .val { color: var(--green); }
-    .metric.purple .val { color: var(--purple); }
 
-    .result-box {
-      margin-top: 1rem;
-      background: #040711;
-      border: 1px solid var(--border);
+    .metric-pill {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
       border-radius: 8px;
+      padding: 0.45rem 0.85rem;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .metric-pill .val { font-weight: 700; color: #fff; margin-right: 0.3rem; }
+    .metric-pill.highlight-green .val { color: var(--accent-emerald); }
+    .metric-pill.highlight-purple .val { color: var(--accent-purple); }
+
+    .result-terminal {
+      margin-top: 1rem;
+      background: #02040a;
+      border: 1px solid var(--border-glass);
+      border-radius: 12px;
       overflow: hidden;
       display: none;
     }
-    .result-box.show { display: block; }
-    .result-header {
+    .result-terminal.show { display: block; }
+    .terminal-head {
       background: #0c1222;
-      padding: .5rem .85rem;
+      padding: 0.5rem 1rem;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      border-bottom: 1px solid var(--border);
-    }
-    .result-header .status {
-      display: flex;
-      align-items: center;
-      gap: .4rem;
-      font-size: .8rem;
-      color: var(--green);
+      border-bottom: 1px solid var(--border-glass);
+      font-size: 0.8rem;
+      color: var(--accent-emerald);
       font-weight: 600;
     }
-    .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); }
-    pre {
-      padding: .85rem;
-      font-family: var(--mono);
-      font-size: .85rem;
-      color: var(--accent);
+
+    pre.code-output {
+      padding: 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      color: var(--accent-cyan);
       overflow-x: auto;
       white-space: pre-wrap;
     }
 
-    /* Suggestions & Ideas */
-    .suggestion-list { display: flex; flex-direction: column; gap: .6rem; margin-top: 1rem; }
-    .suggestion-card {
-      background: #060913;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: .85rem 1rem;
+    /* Suggest & Idea Cards */
+    .suggestions-wrapper {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      margin-top: 1rem;
+    }
+
+    .suggest-card {
+      background: #050811;
+      border: 1px solid var(--border-glass);
+      border-radius: 12px;
+      padding: 1rem 1.25rem;
       display: flex;
       align-items: center;
       gap: 1rem;
     }
-    .rank-badge {
-      width: 28px;
-      height: 28px;
+
+    .suggest-rank {
+      width: 32px;
+      height: 32px;
       border-radius: 50%;
-      background: var(--surface2);
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--accent-cyan);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-weight: 700;
-      color: var(--accent);
+      font-family: var(--font-display);
+      font-weight: 800;
     }
-    .suggestion-info { flex: 1; }
-    .suggestion-name { font-weight: 700; font-size: .95rem; color: #fff; }
-    .site-tag {
+
+    .tag-badge {
       background: rgba(56, 189, 248, 0.15);
-      color: var(--accent);
-      font-size: .75rem;
+      color: var(--accent-cyan);
+      font-size: 0.75rem;
       padding: 1px 6px;
       border-radius: 4px;
-      margin-left: .4rem;
+      margin-left: 0.4rem;
     }
 
-    .idea-grid {
+    .idea-layout {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-      gap: 1rem;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 1.25rem;
       margin-top: 1rem;
     }
-    .idea-card {
-      background: #060913;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 1.1rem;
-    }
-    .idea-title { font-size: 1.05rem; font-weight: 700; color: #fff; margin-bottom: .3rem; }
-    .idea-summary { font-size: .85rem; color: var(--muted); margin-bottom: .8rem; }
-    .idea-layers { display: flex; flex-direction: column; gap: .35rem; }
-    .idea-layer {
-      display: flex;
-      gap: .5rem;
-      font-size: .8rem;
-      background: var(--surface2);
-      padding: .4rem .6rem;
-      border-radius: 4px;
-    }
-    .layer-num { font-weight: 800; color: var(--accent); }
-    .idea-cmd {
-      margin-top: .8rem;
-      font-family: var(--mono);
-      font-size: .8rem;
-      color: var(--green);
-      background: #02040a;
-      padding: .4rem .6rem;
-      border-radius: 4px;
+
+    .blueprint-card {
+      background: #050811;
+      border: 1px solid var(--border-glass);
+      border-radius: 16px;
+      padding: 1.25rem;
     }
 
-    /* Chips */
-    .vertical-chips { display: flex; gap: .4rem; flex-wrap: wrap; margin-bottom: 1rem; }
-    .chip {
-      background: var(--surface2);
-      border: 1px solid rgba(255,255,255,0.08);
-      color: var(--muted);
+    .blueprint-title {
+      font-family: var(--font-display);
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 0.4rem;
+    }
+
+    .blueprint-summary {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 1rem;
+    }
+
+    .blueprint-steps {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .bp-step {
+      display: flex;
+      gap: 0.6rem;
+      font-size: 0.8rem;
+      background: rgba(255, 255, 255, 0.04);
+      padding: 0.45rem 0.75rem;
+      border-radius: 6px;
+    }
+    .bp-num { font-weight: 800; color: var(--accent-cyan); }
+
+    .chip-selector {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 1rem;
+    }
+
+    .filter-chip {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: var(--text-muted);
       border-radius: 20px;
-      padding: .35rem .8rem;
-      font-size: .8rem;
+      padding: 0.4rem 0.9rem;
+      font-size: 0.85rem;
       font-weight: 600;
       cursor: pointer;
-      transition: all .15s;
+      transition: all 0.2s ease;
     }
-    .chip:hover { border-color: var(--accent); color: #fff; }
-    .chip.active { background: var(--accent); color: #000; border-color: var(--accent); }
+
+    .filter-chip:hover { color: #fff; border-color: var(--accent-cyan); }
+    .filter-chip.active {
+      background: var(--accent-cyan);
+      color: #000;
+      border-color: var(--accent-cyan);
+    }
 
     /* Footer */
     footer {
-      background: var(--surface);
-      border-top: 1px solid var(--border);
+      border-top: 1px solid var(--border-glass);
       text-align: center;
-      padding: 1.5rem;
-      font-size: .85rem;
-      color: var(--muted);
-      margin-top: 2rem;
+      padding: 2.5rem 1.5rem;
+      font-size: 0.85rem;
+      color: var(--text-subtle);
     }
-    footer a { color: var(--accent); text-decoration: none; }
+    footer a { color: var(--accent-cyan); text-decoration: none; }
 
-    @media(max-width: 768px) {
-      .agent-loop { grid-template-columns: 1fr; }
-      .extension-callout { flex-direction: column; align-items: flex-start; }
-      .tabs { overflow-x: auto; }
+    @media(max-width: 860px) {
+      .loop-grid { grid-template-columns: 1fr; }
+      .extension-hero-card { flex-direction: column; align-items: flex-start; }
+      .hero-title { font-size: 2.5rem; }
     }
   </style>
 </head>
 <body>
 
-<!-- Top Navigation -->
-<header>
-  <div class="logo">&#x26A1; Webcmd <span>— SLAB Hackathon Official Release</span></div>
-  <div class="badge">VSSUT HACKATHON 2026</div>
-  <div class="header-right">
-    <a href="/slab-agent-extension.zip" download="slab-agent-extension.zip" style="color:var(--accent);font-weight:700;">&#x2B07;&#xFE0F; Extension (.ZIP)</a>
-    <a href="https://github.com/ChandraPrakashMishra001/SLAB_webcmd_VSSUT" target="_blank">&#x2B50; GitHub</a>
-  </div>
-</header>
+<!-- Liquid Glass Nav (Neural Leaf Style) -->
+<nav class="glass-liquid-nav">
+  <div class="nav-container">
+    <a href="#" class="brand-logo">
+      <div class="brand-icon">&#x26A1;</div>
+      <div class="brand-name">SLAB AGENT <span class="brand-badge">VSSUT</span></div>
+    </a>
 
-<!-- SLAB Hero Banner -->
-<div class="slab-banner">
-  <div class="slab-title">SLAB</div>
-  <div class="slab-sub">HACKATHON</div>
-  <div class="slab-divider"></div>
-  <div class="theme-label">Theme</div>
-  <div class="theme-title">&#x1F916; VOICE & AI BROWSER AGENTS</div>
-  <div class="theme-desc">Intelligent browser agents that explore, learn workflows, and automate the web with voice commands and 90% token reduction.</div>
-  <div style="margin-top:.8rem;font-size:.75rem;color:var(--muted);letter-spacing:.08em;">VEER SURENDRA SAI UNIVERSITY OF TECHNOLOGY · ODISHA</div>
-
-  <!-- Download Chrome Extension Banner -->
-  <div class="extension-callout">
-    <div class="callout-content">
-      <span class="callout-badge">&#x1F525; CHROME EXTENSION AVAILABLE</span>
-      <div class="callout-title">SLAB AI Voice Browser Agent v1.0.0</div>
-      <div class="callout-desc">Full voice navigation, streaming chat, DOM reading, customizable skills, and MCP tools in your browser.</div>
+    <div class="nav-links">
+      <a href="/slab-agent-extension.zip" download="slab-agent-extension.zip" class="btn-liquid-nav">
+        &#x2B07;&#xFE0F; Chrome Extension (.ZIP)
+      </a>
+      <a href="https://github.com/ChandraPrakashMishra001/SLAB_webcmd_VSSUT" target="_blank" class="nav-btn">
+        &#x2B50; GitHub
+      </a>
     </div>
-    <a href="/slab-agent-extension.zip" download="slab-agent-extension.zip" class="btn-download-extension">
+  </div>
+</nav>
+
+<!-- Hero Section with Neural Leaf Shimmering Chrome -->
+<section class="hero-section">
+  <div class="university-badge">
+    <span>&#x1F393;</span> VEER SURENDRA SAI UNIVERSITY OF TECHNOLOGY · ODISHA
+  </div>
+
+  <h1 class="hero-title text-chrome">SLAB BROWSER AGENTS</h1>
+  <p class="hero-subtitle">
+    Intelligent agents that explore websites, learn workflows, and automate deterministic web tasks with voice navigation and <strong>90% token reduction</strong>.
+  </p>
+
+  <!-- Download Chrome Extension Hero Card -->
+  <div class="extension-hero-card">
+    <div class="callout-info">
+      <span class="badge-pill">&#x1F525; HACKATHON RELEASE V1.0.0</span>
+      <div class="callout-heading">SLAB Voice Browser Extension</div>
+      <div class="callout-sub">Voice-guided browsing, streaming chat, live page reading, customizable skills, and MCP tools.</div>
+    </div>
+    <a href="/slab-agent-extension.zip" download="slab-agent-extension.zip" class="btn-download-glow">
       <span>&#x2B07;&#xFE0F; Download Extension (.ZIP)</span>
     </a>
   </div>
-</div>
+</section>
 
-<div class="container">
+<!-- Main Container -->
+<div class="main-container">
 
-  <!-- 4-Layer Agent Loop -->
-  <div class="agent-loop">
-    <div class="loop-step">
-      <div class="loop-num">Layer 0</div>
+  <!-- Problem Statement Banner -->
+  <div class="problem-glass-banner">
+    <div class="problem-icon-wrap">&#x1F3AF;</div>
+    <div>
+      <div class="problem-label">Hackathon Problem Statement</div>
+      <div class="problem-text">
+        Build an <strong>AI-powered Browser Agent</strong> that can explore websites, learn real-world workflows, and reliably automate and reuse those workflows with <strong>structured outputs</strong>.
+      </div>
+    </div>
+  </div>
+
+  <!-- Entry Requirements Bar -->
+  <div class="requirements-bar">
+    <div class="req-tag">&#x26A0;&#xFE0F; <strong>Entry Requirements:</strong></div>
+    <div class="req-tag">&#x2705; GitHub Account (Mandatory)</div>
+    <div class="req-tag">&#x2705; Webcmd Integration</div>
+    <div class="req-tag">&#x2705; Registered Team</div>
+    <div class="req-tag">&#x1F558; Hackathon: 10:30 AM – 12:30 PM</div>
+  </div>
+
+  <!-- 4-Layer SLAB Architecture Loop -->
+  <div class="loop-grid">
+    <div class="loop-card">
+      <div class="loop-layer-tag">Layer 0</div>
       <div class="loop-title">&#x1F52D; Explore</div>
-      <div class="loop-desc">Live browser session. Inspect pages, network requests, and DOM trees.</div>
+      <div class="loop-desc">Live sandboxed Playwright session. Inspects DOM structures, network endpoints, and state signatures.</div>
     </div>
-    <div class="loop-step">
-      <div class="loop-num">Layer 1</div>
+    <div class="loop-card">
+      <div class="loop-layer-tag">Layer 1</div>
       <div class="loop-title">&#x1F9E0; Learn</div>
-      <div class="loop-desc">Save sitemap memory graph, DOM selectors, and authentication state.</div>
+      <div class="loop-desc">Preserves endpoint sitemaps, auth tokens, and DOM selectors into persistent agent memory.</div>
     </div>
-    <div class="loop-step">
-      <div class="loop-num">Layer 2</div>
+    <div class="loop-card">
+      <div class="loop-layer-tag">Layer 2</div>
       <div class="loop-title">&#x1F6E0;&#xFE0F; Adapt</div>
-      <div class="loop-desc">Author reusable CLI adapters with structured JSON output schemas.</div>
+      <div class="loop-desc">Synthesizes deterministic CLI adapters with structured JSON output schemas.</div>
     </div>
-    <div class="loop-step">
-      <div class="loop-num">Layer 3</div>
+    <div class="loop-card">
+      <div class="loop-layer-tag">Layer 3</div>
       <div class="loop-title">&#x26A1; Automate</div>
-      <div class="loop-desc">Execute <code>webcmd -f json</code> with sub-second latency and 90% token savings.</div>
+      <div class="loop-desc">Sub-second execution via <code>webcmd &lt;site&gt; -f json</code> with up to 90% token reduction.</div>
     </div>
   </div>
 
-  <!-- Tabs -->
-  <div class="tabs">
-    <button class="tab active" onclick="switchTab('voice')">&#x1F3A4; Live Voice Agent</button>
-    <button class="tab" onclick="switchTab('prompt')">&#x26A1; Prompt Optimizer</button>
-    <button class="tab" onclick="switchTab('suggest')">&#x1F50D; Auto-Suggest</button>
-    <button class="tab" onclick="switchTab('idea')">&#x1F4A1; Idea Generator</button>
+  <!-- Tabs Navigation -->
+  <div class="tabs-header">
+    <button class="tab-item active" onclick="activateTab('voice')">&#x1F3A4; Live Voice Agent</button>
+    <button class="tab-item" onclick="activateTab('prompt')">&#x26A1; Prompt Optimizer</button>
+    <button class="tab-item" onclick="activateTab('suggest')">&#x1F50D; Auto-Suggest Engine</button>
+    <button class="tab-item" onclick="activateTab('idea')">&#x1F4A1; Idea Generator</button>
   </div>
 
-  <!-- Panel 0: Live Voice Agent -->
-  <div id="panel-voice" class="panel active">
-    <div class="card">
-      <div class="card-title">
-        <div class="icon">&#x1F3A4;</div>
-        Voice-Powered AI Browser Agent (In-Browser Live Test)
+  <!-- Tab 0: Live Voice Agent -->
+  <div id="tab-voice" class="tab-panel active">
+    <div class="glass-card">
+      <div class="card-heading">&#x1F3A4; Voice-Powered Browser Agent (In-Browser Live Test)</div>
+
+      <div class="voice-dock">
+        <button id="micBtn" class="mic-button-big" onclick="toggleSpeech()" title="Click to Speak">
+          &#x1F3A4;
+        </button>
+        <div id="voiceStatus" class="voice-status-label">Click microphone to speak or type instruction below</div>
       </div>
 
-      <div class="voice-arena">
-        <div class="mic-hero-wrapper">
-          <button id="webMicBtn" class="big-mic-btn" onclick="toggleWebVoice()" title="Click to Speak">
-            &#x1F3A4;
-          </button>
-          <div id="webVoiceStatus" class="voice-status-text">Click microphone to speak or type below</div>
-        </div>
-
-        <div id="webChatBox" class="web-chat-box">
-          <div class="web-msg agent">
-            &#x1F916; <strong>SLAB Voice Agent is live!</strong> Speak or type an instruction (e.g. <em>"Find top tech stories on Hacker News"</em> or <em>"Track Bitcoin price"</em>).
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div class="grow">
-            <input type="text" id="webVoiceInput" placeholder="Speak or type a command... e.g. 'Search for quantum computing papers on arXiv'" onkeydown="if(event.key==='Enter') sendWebVoiceMessage()" />
-          </div>
-          <button class="btn btn-primary" onclick="sendWebVoiceMessage()">
-            <span>&#x27A4; Send</span>
-          </button>
-        </div>
-
-        <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.5rem;">
-          <button class="btn btn-secondary" onclick="fillWebVoice('Find top Hacker News tech stories')">&#x1F525; Top Hacker News</button>
-          <button class="btn btn-secondary" onclick="fillWebVoice('Track Bitcoin price with webcmd')">&#x1F4B0; Bitcoin Price</button>
-          <button class="btn btn-secondary" onclick="fillWebVoice('Search PubMed for CRISPR research papers')">&#x1F9EC; PubMed Papers</button>
-          <button class="btn btn-secondary" onclick="fillWebVoice('Find cheap flights from Delhi to London')">&#x2708;&#xFE0F; Flight Search</button>
+      <div id="chatBox" class="chat-display">
+        <div class="chat-msg agent">
+          &#x1F916; <strong>SLAB Voice Agent is active!</strong> Speak or type a command (e.g. <em>"Find top Hacker News stories"</em> or <em>"Track Bitcoin price on CoinGecko"</em>).
         </div>
       </div>
-    </div>
-  </div>
 
-  <!-- Panel 1: Prompt Optimizer -->
-  <div id="panel-prompt" class="panel">
-    <div class="card">
-      <div class="card-title">
-        <div class="icon">&#x26A1;</div>
-        Token-Minimizing Prompt Optimizer (90% Token Reduction)
-      </div>
-      <label>Enter your verbose browser instruction:</label>
-      <textarea id="prompt-input" placeholder="e.g. Please go to Hacker News and find the top 5 AI stories with titles and links"></textarea>
-      <div class="form-row">
-        <div class="grow"></div>
-        <button class="btn btn-primary" id="prompt-btn" onclick="runPromptOptimize()">
-          <span class="btn-icon">&#x26A1;</span> Optimize
+      <div class="row-flex">
+        <div class="flex-grow">
+          <input type="text" id="voiceTextInput" placeholder="Speak or type a command... e.g. 'Search for quantum computing papers on arXiv'" onkeydown="if(event.key==='Enter') submitVoiceMessage()" />
+        </div>
+        <button class="btn-action btn-primary-action" onclick="submitVoiceMessage()">
+          &#x27A4; Send
         </button>
       </div>
-      <div id="prompt-metrics" class="metrics"></div>
-      <div id="prompt-result" class="result-box">
-        <div class="result-header">
-          <div class="status"><div class="dot"></div> Structured Output</div>
-          <button class="btn btn-secondary" style="padding:.25rem .5rem;font-size:.75rem" onclick="copyResult('prompt-pre', this)">Copy</button>
-        </div>
-        <pre id="prompt-pre"></pre>
+
+      <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-top:0.85rem;">
+        <button class="btn-action btn-secondary-action" onclick="quickFillVoice('Find top Hacker News tech stories')">&#x1F525; Top Hacker News</button>
+        <button class="btn-action btn-secondary-action" onclick="quickFillVoice('Track Bitcoin price with webcmd')">&#x1F4B0; Bitcoin Price</button>
+        <button class="btn-action btn-secondary-action" onclick="quickFillVoice('Search PubMed for CRISPR gene editing papers')">&#x1F9EC; PubMed Papers</button>
+        <button class="btn-action btn-secondary-action" onclick="quickFillVoice('Find cheap flights from Delhi to London')">&#x2708;&#xFE0F; Flight Search</button>
       </div>
     </div>
   </div>
 
-  <!-- Panel 2: Auto-Suggest -->
-  <div id="panel-suggest" class="panel">
-    <div class="card">
-      <div class="card-title"><div class="icon">&#x1F50D;</div> Auto-Suggest from Webcmd Adapters</div>
-      <label>Describe your browser automation goal in plain English:</label>
-      <input type="text" id="suggest-input" placeholder="e.g. track cryptocurrency prices on CoinGecko" onkeydown="if(event.key==='Enter') runSuggest()" />
-      <div class="form-row">
-        <div>
-          <label>Max results</label>
-          <select id="suggest-limit">
-            <option value="3">3</option>
-            <option value="5" selected>5</option>
-            <option value="10">10</option>
+  <!-- Tab 1: Prompt Optimizer -->
+  <div id="tab-prompt" class="tab-panel">
+    <div class="glass-card">
+      <div class="card-heading">&#x26A1; Token-Minimizing Prompt Optimizer (90% Token Reduction)</div>
+      <div class="form-group">
+        <label>Enter your verbose browser instruction:</label>
+        <textarea id="promptInput" placeholder="e.g. Please go to Hacker News and find the top 5 AI stories with titles and links"></textarea>
+      </div>
+      <div class="row-flex">
+        <div class="flex-grow"></div>
+        <button class="btn-action btn-primary-action" id="btnOpt" onclick="executePromptOptimize()">
+          &#x26A1; Optimize Command
+        </button>
+      </div>
+      <div id="optMetrics" class="metrics-bar"></div>
+      <div id="optResult" class="result-terminal">
+        <div class="terminal-head">
+          <span>&#x2705; Deterministic Structured CLI Output</span>
+          <button class="btn-action btn-secondary-action" style="padding:0.25rem 0.6rem;font-size:0.75rem" onclick="copyTerminal('optPre', this)">Copy</button>
+        </div>
+        <pre id="optPre" class="code-output"></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab 2: Auto-Suggest Engine -->
+  <div id="tab-suggest" class="tab-panel">
+    <div class="glass-card">
+      <div class="card-heading">&#x1F50D; Auto-Suggest from 842 Webcmd Adapters</div>
+      <div class="form-group">
+        <label>Describe your browser automation goal in plain English:</label>
+        <input type="text" id="suggestInput" placeholder="e.g. track cryptocurrency prices on CoinGecko" onkeydown="if(event.key==='Enter') executeSuggest()" />
+      </div>
+      <div class="row-flex">
+        <div style="width:140px;">
+          <select id="suggestLimit">
+            <option value="3">3 Results</option>
+            <option value="5" selected>5 Results</option>
+            <option value="10">10 Results</option>
           </select>
         </div>
-        <div class="grow"></div>
-        <button class="btn btn-primary" id="suggest-btn" onclick="runSuggest()">
-          <span class="btn-icon">&#x1F50D;</span> Find Commands
+        <div class="flex-grow"></div>
+        <button class="btn-action btn-primary-action" onclick="executeSuggest()">
+          &#x1F50D; Find Commands
         </button>
       </div>
-      <div id="suggestion-list" class="suggestion-list"></div>
+      <div id="suggestList" class="suggestions-wrapper"></div>
     </div>
   </div>
 
-  <!-- Panel 3: Idea Generator -->
-  <div id="panel-idea" class="panel">
-    <div class="card">
-      <div class="card-title"><div class="icon">&#x1F4A1;</div> SLAB Browser Agent Idea Generator</div>
-      <p style="color:var(--muted);font-size:.85rem;margin-bottom:1rem;">
+  <!-- Tab 3: Idea Generator -->
+  <div id="tab-idea" class="tab-panel">
+    <div class="glass-card">
+      <div class="card-heading">&#x1F4A1; SLAB Browser Agent Idea Generator</div>
+      <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:1rem;">
         Generate production-ready browser agent ideas with <strong>complete 4-layer SLAB blueprints</strong>:
       </p>
-      <div class="vertical-chips" id="vertical-chips">
-        <div class="chip active" onclick="selectVertical('all', this)">&#x1F310; All</div>
-        <div class="chip" onclick="selectVertical('ecommerce', this)">&#x1F6D2; E-Commerce</div>
-        <div class="chip" onclick="selectVertical('research', this)">&#x1F52C; Research</div>
-        <div class="chip" onclick="selectVertical('travel', this)">&#x2708;&#xFE0F; Travel</div>
-        <div class="chip" onclick="selectVertical('career', this)">&#x1F4BC; Career</div>
-        <div class="chip" onclick="selectVertical('social', this)">&#x1F4F1; Social</div>
-        <div class="chip" onclick="selectVertical('devtools', this)">&#x1F6E0;&#xFE0F; DevTools</div>
-        <div class="chip" onclick="selectVertical('finance', this)">&#x1F4B0; Finance</div>
+      <div class="chip-selector">
+        <div class="filter-chip active" onclick="chooseVertical('all', this)">&#x1F310; All</div>
+        <div class="filter-chip" onclick="chooseVertical('ecommerce', this)">&#x1F6D2; E-Commerce</div>
+        <div class="filter-chip" onclick="chooseVertical('research', this)">&#x1F52C; Research</div>
+        <div class="filter-chip" onclick="chooseVertical('travel', this)">&#x2708;&#xFE0F; Travel</div>
+        <div class="filter-chip" onclick="chooseVertical('career', this)">&#x1F4BC; Career</div>
+        <div class="filter-chip" onclick="chooseVertical('social', this)">&#x1F4F1; Social</div>
+        <div class="filter-chip" onclick="chooseVertical('devtools', this)">&#x1F6E0;&#xFE0F; DevTools</div>
+        <div class="filter-chip" onclick="chooseVertical('finance', this)">&#x1F4B0; Finance</div>
       </div>
       <div style="display:flex;justify-content:flex-end;">
-        <button class="btn btn-primary" id="idea-btn" onclick="runIdea()">
-          <span class="btn-icon">&#x1F4A1;</span> Generate Blueprint
+        <button class="btn-action btn-primary-action" onclick="executeIdea()">
+          &#x1F4A1; Generate Blueprint
         </button>
       </div>
     </div>
-    <div id="idea-grid" class="idea-grid"></div>
+    <div id="ideaGrid" class="idea-layout"></div>
   </div>
 
 </div>
 
 <!-- Footer -->
 <footer>
-  <strong>SLAB Hackathon</strong> — Veer Surendra Sai University of Technology, Odisha &nbsp;·&nbsp;
+  <strong>SLAB Hackathon 2026</strong> — Veer Surendra Sai University of Technology, Odisha &nbsp;·&nbsp;
   <a href="https://github.com/ChandraPrakashMishra001/SLAB_webcmd_VSSUT" target="_blank">SLAB Webcmd Repository</a> &nbsp;·&nbsp;
-  Theme: <strong>Browser Agents</strong> · Built with <strong>Webcmd + Web Speech API + MCP</strong>
+  Theme: <strong>Browser Agents</strong> · Design System: <strong>Neural Leaf Liquid Glass</strong>
 </footer>
 
 <script>
-  let selectedVertical = 'all';
-  let webRec = null;
-  let webRecording = false;
+  let activeVertical = 'all';
+  let speechRec = null;
+  let isSpeechRecording = false;
 
-  function switchTab(name) {
-    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    document.getElementById('panel-' + name).classList.add('active');
-    const tabs = document.querySelectorAll('.tab');
+  function activateTab(tabKey) {
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+    document.getElementById('tab-' + tabKey).classList.add('active');
+    const tabs = document.querySelectorAll('.tab-item');
     const map = { voice: 0, prompt: 1, suggest: 2, idea: 3 };
-    if (tabs[map[name]]) tabs[map[name]].classList.add('active');
+    if (tabs[map[tabKey]]) tabs[map[tabKey]].classList.add('active');
   }
 
-  function copyResult(preId, btn) {
+  function chooseVertical(v, el) {
+    activeVertical = v;
+    document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+  }
+
+  function copyTerminal(preId, btn) {
     navigator.clipboard.writeText(document.getElementById(preId).textContent).then(() => {
       btn.textContent = '✓ Copied!';
       setTimeout(() => { btn.textContent = 'Copy'; }, 2000);
     });
   }
 
-  function fillPrompt(text) { document.getElementById('prompt-input').value = text; }
-  function fillWebVoice(text) {
-    document.getElementById('webVoiceInput').value = text;
-    sendWebVoiceMessage();
+  function quickFillVoice(txt) {
+    document.getElementById('voiceTextInput').value = txt;
+    submitVoiceMessage();
   }
 
-  function selectVertical(v, el) {
-    selectedVertical = v;
-    document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-    el.classList.add('active');
-  }
+  // Web Speech API
+  function initSpeechEngine() {
+    const SpeechAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechAPI) return;
+    speechRec = new SpeechAPI();
+    speechRec.continuous = false;
+    speechRec.interimResults = true;
+    speechRec.lang = 'en-US';
 
-  // Web Voice Support
-  function initWebVoice() {
-    const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRec) return;
-    webRec = new SpeechRec();
-    webRec.continuous = false;
-    webRec.interimResults = true;
-    webRec.lang = 'en-US';
-
-    webRec.onstart = () => {
-      webRecording = true;
-      document.getElementById('webMicBtn').classList.add('recording');
-      document.getElementById('webVoiceStatus').textContent = 'Listening to your voice...';
+    speechRec.onstart = () => {
+      isSpeechRecording = true;
+      document.getElementById('micBtn').classList.add('recording');
+      document.getElementById('voiceStatus').textContent = 'Listening to voice command...';
     };
 
-    webRec.onresult = (e) => {
+    speechRec.onresult = (e) => {
       let str = '';
       for (let i = e.resultIndex; i < e.results.length; ++i) {
         str += e.results[i][0].transcript;
       }
-      document.getElementById('webVoiceInput').value = str;
+      document.getElementById('voiceTextInput').value = str;
       if (e.results[0].isFinal) {
         setTimeout(() => {
-          stopWebVoice();
-          sendWebVoiceMessage();
+          stopSpeech();
+          submitVoiceMessage();
         }, 400);
       }
     };
 
-    webRec.onend = () => {
-      stopWebVoice();
-    };
+    speechRec.onend = () => { stopSpeech(); };
   }
 
-  function toggleWebVoice() {
-    if (!webRec) initWebVoice();
-    if (!webRec) {
+  function toggleSpeech() {
+    if (!speechRec) initSpeechEngine();
+    if (!speechRec) {
       alert('Speech Recognition is not supported on this browser. You can type instructions directly.');
       return;
     }
-    if (webRecording) {
-      stopWebVoice();
+    if (isSpeechRecording) {
+      stopSpeech();
     } else {
-      try { webRec.start(); } catch (e) {}
+      try { speechRec.start(); } catch (e) {}
     }
   }
 
-  function stopWebVoice() {
-    if (webRec && webRecording) webRec.stop();
-    webRecording = false;
-    document.getElementById('webMicBtn').classList.remove('recording');
-    document.getElementById('webVoiceStatus').textContent = 'Click microphone to speak or type below';
+  function stopSpeech() {
+    if (speechRec && isSpeechRecording) speechRec.stop();
+    isSpeechRecording = false;
+    document.getElementById('micBtn').classList.remove('recording');
+    document.getElementById('voiceStatus').textContent = 'Click microphone to speak or type instruction below';
   }
 
-  async function sendWebVoiceMessage() {
-    const input = document.getElementById('webVoiceInput');
+  async function submitVoiceMessage() {
+    const input = document.getElementById('voiceTextInput');
     const msg = input.value.trim();
     if (!msg) return;
 
     input.value = '';
-    const box = document.getElementById('webChatBox');
+    const box = document.getElementById('chatBox');
 
     // Add user message
-    const userEl = document.createElement('div');
-    userEl.className = 'web-msg user';
-    userEl.textContent = msg;
-    box.appendChild(userEl);
+    const uMsg = document.createElement('div');
+    uMsg.className = 'chat-msg user';
+    uMsg.textContent = msg;
+    box.appendChild(uMsg);
     box.scrollTop = box.scrollHeight;
 
     // Add agent thinking placeholder
-    const agentEl = document.createElement('div');
-    agentEl.className = 'web-msg agent';
-    agentEl.innerHTML = '&#x26A1; <em>Executing 4-layer SLAB optimization...</em>';
-    box.appendChild(agentEl);
+    const aMsg = document.createElement('div');
+    aMsg.className = 'chat-msg agent';
+    aMsg.innerHTML = '&#x26A1; <em>Synthesizing 4-layer SLAB deterministic command...</em>';
+    box.appendChild(aMsg);
     box.scrollTop = box.scrollHeight;
 
     try {
@@ -872,29 +1138,29 @@
       });
       const data = await res.json();
 
-      let replyHtml = `<strong>&#x1F916; Optimized Command:</strong><br><code>${escHtml(data.optimizedCommand)}</code><br><br>` +
+      let replyHtml = `<strong>&#x1F916; Optimized Command:</strong><br><code style="color:#38bdf8">${sanitize(data.optimizedCommand)}</code><br><br>` +
         `<strong>Token Reduction:</strong> ${data.percentReduction}% savings (${data.originalEstimatedTokens} -> ${data.optimizedEstimatedTokens} tokens)<br>` +
-        `<strong>Strategy:</strong> ${escHtml(data.strategy)}`;
+        `<strong>Strategy:</strong> ${sanitize(data.strategy)}`;
 
-      agentEl.innerHTML = replyHtml;
+      aMsg.innerHTML = replyHtml;
 
-      // Voice response
+      // Voice output
       if ('speechSynthesis' in window) {
         const spoken = `Executing optimized command. Saved ${data.percentReduction} percent tokens.`;
         const u = new SpeechSynthesisUtterance(spoken);
         window.speechSynthesis.speak(u);
       }
     } catch (e) {
-      agentEl.innerHTML = `&#x274C; Error: ${e.message}`;
+      aMsg.innerHTML = `&#x274C; Error: ${e.message}`;
     }
     box.scrollTop = box.scrollHeight;
   }
 
-  async function runPromptOptimize() {
-    const prompt = document.getElementById('prompt-input').value.trim();
+  async function executePromptOptimize() {
+    const prompt = document.getElementById('promptInput').value.trim();
     if (!prompt) { alert('Please enter a prompt first.'); return; }
-    document.getElementById('prompt-metrics').innerHTML = '';
-    document.getElementById('prompt-result').classList.remove('show');
+    document.getElementById('optMetrics').innerHTML = '';
+    document.getElementById('optResult').classList.remove('show');
     try {
       const res = await fetch('/api/prompt/optimize', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -902,22 +1168,22 @@
       });
       const data = await res.json();
       if (data.error) { alert('Error: ' + data.error); return; }
-      document.getElementById('prompt-metrics').innerHTML = `
-        <div class="metric green"><span class="val">${data.percentReduction}%</span> token reduction</div>
-        <div class="metric"><span class="val">${data.originalEstimatedTokens}</span> original tokens</div>
-        <div class="metric"><span class="val">${data.optimizedEstimatedTokens}</span> optimized tokens</div>
-        <div class="metric purple"><span class="val">${data.matchedSite ?? '—'}</span> matched site</div>
+      document.getElementById('optMetrics').innerHTML = `
+        <div class="metric-pill highlight-green"><span class="val">${data.percentReduction}%</span> token reduction</div>
+        <div class="metric-pill"><span class="val">${data.originalEstimatedTokens}</span> original tokens</div>
+        <div class="metric-pill"><span class="val">${data.optimizedEstimatedTokens}</span> optimized tokens</div>
+        <div class="metric-pill highlight-purple"><span class="val">${data.matchedSite ?? '—'}</span> matched site</div>
       `;
-      document.getElementById('prompt-pre').textContent = JSON.stringify(data, null, 2);
-      document.getElementById('prompt-result').classList.add('show');
+      document.getElementById('optPre').textContent = JSON.stringify(data, null, 2);
+      document.getElementById('optResult').classList.add('show');
     } catch (e) { alert('Network error: ' + e.message); }
   }
 
-  async function runSuggest() {
-    const intent = document.getElementById('suggest-input').value.trim();
+  async function executeSuggest() {
+    const intent = document.getElementById('suggestInput').value.trim();
     if (!intent) { alert('Please enter an intent first.'); return; }
-    const limit = Number(document.getElementById('suggest-limit').value);
-    document.getElementById('suggestion-list').innerHTML = '';
+    const limit = Number(document.getElementById('suggestLimit').value);
+    document.getElementById('suggestList').innerHTML = '';
     try {
       const res = await fetch('/api/suggest', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -925,50 +1191,50 @@
       });
       const data = await res.json();
       if (data.error) { alert('Error: ' + data.error); return; }
-      document.getElementById('suggestion-list').innerHTML = (data.suggestions || []).map((s, i) => `
-        <div class="suggestion-card">
-          <div class="rank-badge">${i + 1}</div>
-          <div class="suggestion-info">
-            <div class="suggestion-name">
-              <span>${escHtml(s.command)}</span>
-              <span class="site-tag">${escHtml(s.site)}</span>
+      document.getElementById('suggestList').innerHTML = (data.suggestions || []).map((s, i) => `
+        <div class="suggest-card">
+          <div class="suggest-rank">${i + 1}</div>
+          <div style="flex:1">
+            <div style="font-weight:700;color:#fff;">
+              <span>${sanitize(s.command)}</span>
+              <span class="tag-badge">${sanitize(s.site)}</span>
             </div>
-            <div style="font-size:.85rem;color:var(--muted);margin-top:.2rem;">${escHtml(s.description ?? '')}</div>
-            <div style="font-family:var(--mono);font-size:.8rem;color:var(--green);margin-top:.4rem;">${escHtml(s.exampleInvocation)}</div>
+            <div style="font-size:0.85rem;color:var(--text-muted);margin-top:0.25rem;">${sanitize(s.description ?? '')}</div>
+            <div style="font-family:var(--font-mono);font-size:0.8rem;color:var(--accent-emerald);margin-top:0.4rem;">${sanitize(s.exampleInvocation)}</div>
           </div>
         </div>`).join('');
     } catch (e) { alert('Network error: ' + e.message); }
   }
 
-  async function runIdea() {
-    const gridEl = document.getElementById('idea-grid');
+  async function executeIdea() {
+    const gridEl = document.getElementById('ideaGrid');
     gridEl.innerHTML = '';
     try {
-      const res = await fetch(`/api/idea/${selectedVertical}`);
+      const res = await fetch(`/api/idea/${activeVertical}`);
       const data = await res.json();
       if (data.error) { alert('Error: ' + data.error); return; }
       const ideas = Array.isArray(data) ? data : [data];
       gridEl.innerHTML = ideas.map(idea => `
-        <div class="idea-card">
-          <div class="idea-title">${escHtml(idea.title)}</div>
-          <div class="idea-summary">${escHtml(idea.summary)}</div>
-          ${idea.blueprint ? `<div class="idea-layers">
-            <div class="idea-layer"><div class="layer-num">0</div><div>${escHtml(idea.blueprint.layer0Explore)}</div></div>
-            <div class="idea-layer"><div class="layer-num">1</div><div>${escHtml(idea.blueprint.layer1Sitemap)}</div></div>
-            <div class="idea-layer"><div class="layer-num">2</div><div>${escHtml(idea.blueprint.layer2Adapter)}</div></div>
-            <div class="idea-layer"><div class="layer-num">3</div><div>${escHtml(idea.blueprint.layer3Cli)}</div></div>
+        <div class="blueprint-card">
+          <div class="blueprint-title">${sanitize(idea.title)}</div>
+          <div class="blueprint-summary">${sanitize(idea.summary)}</div>
+          ${idea.blueprint ? `<div class="blueprint-steps">
+            <div class="bp-step"><div class="bp-num">0</div><div>${sanitize(idea.blueprint.layer0Explore)}</div></div>
+            <div class="bp-step"><div class="bp-num">1</div><div>${sanitize(idea.blueprint.layer1Sitemap)}</div></div>
+            <div class="bp-step"><div class="bp-num">2</div><div>${sanitize(idea.blueprint.layer2Adapter)}</div></div>
+            <div class="bp-step"><div class="bp-num">3</div><div>${sanitize(idea.blueprint.layer3Cli)}</div></div>
           </div>` : ''}
-          ${idea.sampleCommand ? `<div class="idea-cmd">${escHtml(idea.sampleCommand)}</div>` : ''}
+          ${idea.sampleCommand ? `<div style="margin-top:0.8rem;font-family:var(--font-mono);font-size:0.8rem;color:var(--accent-emerald);background:#02040a;padding:0.4rem 0.6rem;border-radius:4px;">${sanitize(idea.sampleCommand)}</div>` : ''}
         </div>`).join('');
     } catch (e) { alert('Network error: ' + e.message); }
   }
 
-  function escHtml(str) {
-    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  function sanitize(str) {
+    return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
 
-  // Auto-init voice
-  initWebVoice();
+  // Init voice
+  initSpeechEngine();
 </script>
 </body>
 </html>
