@@ -13,6 +13,7 @@
 import { LocalSummarizer } from '../engines/localSummarizer.js';
 import { RemoteEngine } from '../engines/remoteEngine.js';
 import { TokenOptimizer } from '../engines/tokenOptimizer.js';
+import { WebcmdEngine } from '../engines/webcmdEngine.js';
 
 const DEFAULT_SETTINGS = {
   engine: 'local', // 'local' | 'remote'
@@ -145,7 +146,20 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       }
     }
 
-    // 5. Append Action Log & Undo History
+    // 5. Webcmd CLI Engine Execution
+    if (request.type === 'WEBCMD_EXECUTE') {
+      const { prompt, context } = request;
+      const result = await WebcmdEngine.execute(prompt, context, settings);
+      return result;
+    }
+
+    // 6. Webcmd CLI Compile
+    if (request.type === 'WEBCMD_COMPILE') {
+      const compiled = WebcmdEngine.compile(request.prompt);
+      return compiled;
+    }
+
+    // 7. Append Action Log & Undo History
     if (request.type === 'LOG_ACTION') {
       const { action } = request;
       const { actionLog = [] } = await chrome.storage.local.get(['actionLog']);
@@ -154,7 +168,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       return { success: true };
     }
 
-    // 6. Get Action Log
+    // 8. Get Action Log
     if (request.type === 'GET_ACTION_LOG') {
       const { actionLog = [] } = await chrome.storage.local.get(['actionLog']);
       return { actionLog };

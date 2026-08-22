@@ -208,6 +208,13 @@ function initEventListeners() {
     }
   };
 
+  document.addEventListener('click', (e) => {
+    const target = e.target.closest('[data-cmd]');
+    if (target && target.dataset.cmd) {
+      runCommand(target.dataset.cmd);
+    }
+  });
+
   document.getElementById('btnOpenOptions').onclick = () => chrome.runtime.openOptionsPage();
   document.getElementById('lnkOptions').onclick = () => chrome.runtime.openOptionsPage();
   document.getElementById('lnkOnboarding').onclick = () => {
