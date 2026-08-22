@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SLAB AI Voice Agent</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body class="theme-dark">
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="brand">
+        <div class="logo-badge">
+          <span class="logo-icon">&#x26A1;</span>
+        </div>
+        <div class="brand-text">
+          <div class="brand-title">SLAB AGENT <span class="badge-vssut">VSSUT</span></div>
+          <div class="brand-subtitle">Voice-Guided Browser Intelligence</div>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button id="btnReadPage" class="icon-btn" title="Read Active Page (Alt+R)">
+          <span>&#x1F4D6;</span>
+        </button>
+        <button id="btnSettings" class="icon-btn" title="Settings & MCP">
+          <span>&#x2699;&#xFE0F;</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <nav class="tab-nav">
+      <button class="tab-btn active" data-tab="tabChat">
+        <span>&#x1F4AC; Voice Chat</span>
+      </button>
+      <button class="tab-btn" data-tab="tabSkills">
+        <span>&#x1F9E0; Skills (<span id="activeSkillsCount">4</span>)</span>
+      </button>
+      <button class="tab-btn" data-tab="tabWorkflows">
+        <span>&#x26A1; SLAB 4-Layer</span>
+      </button>
+    </nav>
+
+    <!-- Active Tab Context Bar -->
+    <div id="pageContextBar" class="page-context-bar">
+      <span class="context-dot"></span>
+      <span id="activeTabTitle" class="context-title" title="Current tab">Detecting active page...</span>
+      <button id="btnRefreshPageContext" class="btn-micro" title="Refresh page context">&#x21BB;</button>
+    </div>
+
+    <!-- TAB 1: Chat & Voice Interface -->
+    <main id="tabChat" class="tab-content active">
+      <div id="chatMessages" class="chat-messages">
+        <div class="message system-msg">
+          <div class="msg-avatar">&#x1F916;</div>
+          <div class="msg-body">
+            <p><strong>SLAB Voice Agent is ready!</strong></p>
+            <p>Speak naturally or type a command. I can explore websites, execute webcmd workflows, analyze the current tab, or navigate the web.</p>
+            <div class="quick-chips">
+              <button class="chip-btn" data-prompt="Summarize this page">&#x1F4C4; Summarize Page</button>
+              <button class="chip-btn" data-prompt="Search for latest AI agent papers on arXiv">&#x1F50D; Search arXiv</button>
+              <button class="chip-btn" data-prompt="Track Bitcoin price with webcmd">&#x1F4B0; Crypto Price</button>
+              <button class="chip-btn" data-prompt="Find top Hacker News tech stories">&#x1F525; Top HN</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Status Indicators -->
+      <div id="streamStatus" class="stream-status hidden">
+        <span class="pulse-indicator"></span>
+        <span id="streamStatusText">Agent thinking...</span>
+      </div>
+
+      <!-- Voice & Input Dock -->
+      <div class="input-dock">
+        <!-- Voice Waves Visualizer -->
+        <div id="voiceWaveform" class="voice-waveform hidden">
+          <div class="bar"></div>
+          <div class="bar"></div>
+          <div class="bar"></div>
+          <div class="bar"></div>
+          <div class="bar"></div>
+          <span id="voiceLiveTranscript" class="live-transcript">Listening...</span>
+        </div>
+
+        <div class="input-row">
+          <button id="btnVoiceToggle" class="mic-button" title="Push to Speak (or Hold Space)">
+            <span id="micIcon" class="mic-icon">&#x1F3A4;</span>
+            <span class="mic-glow"></span>
+          </button>
+          
+          <div class="input-field-wrapper">
+            <textarea id="txtPrompt" rows="1" placeholder="Speak or ask anything... e.g. 'Search for quantum computing'" autofocus></textarea>
+            <button id="btnSend" class="send-btn" title="Send Message (Enter)">
+              <span>&#x27A4;</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="input-subbar">
+          <label class="auto-speak-toggle">
+            <input type="checkbox" id="chkAutoSpeak" checked>
+            <span>&#x1F50A; Voice Responses</span>
+          </label>
+          <span id="tokenSavingsBadge" class="token-badge">&#x26A1; SLAB 90% Token Reduction</span>
+        </div>
+      </div>
+    </main>
+
+    <!-- TAB 2: Skills & Training -->
+    <section id="tabSkills" class="tab-content">
+      <div class="skills-header">
+        <div>
+          <h3>Agent Skills & Instructions</h3>
+          <p class="section-desc">Toggle specialized capabilities or train new skills.</p>
+        </div>
+        <button id="btnNewSkill" class="btn-primary-sm">+ New Skill</button>
+      </div>
+
+      <!-- Skills List -->
+      <div id="skillsList" class="skills-list">
+        <!-- Populated dynamically -->
+      </div>
+
+      <!-- New Skill Modal / Form -->
+      <div id="newSkillModal" class="modal hidden">
+        <div class="modal-card">
+          <h4>Train New Agent Skill</h4>
+          <input type="text" id="newSkillName" placeholder="Skill Name (e.g. Flight Comparer)">
+          <input type="text" id="newSkillCategory" placeholder="Category (e.g. Travel, E-commerce)">
+          <textarea id="newSkillPrompt" rows="3" placeholder="System instructions for how the agent should handle this skill..."></textarea>
+          <div class="modal-buttons">
+            <button id="btnCancelSkill" class="btn-secondary-sm">Cancel</button>
+            <button id="btnSaveSkill" class="btn-primary-sm">Save Skill</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: SLAB 4-Layer Architecture -->
+    <section id="tabWorkflows" class="tab-content">
+      <div class="pyramid-container">
+        <h3>SLAB Self-Learning Architecture</h3>
+        <p class="section-desc">Explore once. Learn the workflow. Reuse the command.</p>
+
+        <div class="layer-card layer-3">
+          <div class="layer-badge">Layer 3</div>
+          <div class="layer-info">
+            <div class="layer-title">Deterministic CLI Execution</div>
+            <div class="layer-desc">Sub-second execution with <code>webcmd &lt;site&gt; -f json</code>. 0 token overhead.</div>
+          </div>
+        </div>
+
+        <div class="layer-card layer-2">
+          <div class="layer-badge">Layer 2</div>
+          <div class="layer-info">
+            <div class="layer-title">CLI Adapter Synthesis</div>
+            <div class="layer-desc">Auto-generated TypeScript/JSON schemas for reliable structured scraping.</div>
+          </div>
+        </div>
+
+        <div class="layer-card layer-1">
+          <div class="layer-badge">Layer 1</div>
+          <div class="layer-info">
+            <div class="layer-title">Sitemap Memory Graph</div>
+            <div class="layer-desc">Preserves endpoint patterns, auth rules, and DOM signatures.</div>
+          </div>
+        </div>
+
+        <div class="layer-card layer-0">
+          <div class="layer-badge">Layer 0</div>
+          <div class="layer-info">
+            <div class="layer-title">Live Browser Exploration</div>
+            <div class="layer-desc">Sandboxed Playwright session, CDP accessibility snapshot & extraction.</div>
+          </div>
+        </div>
+
+        <div class="hub-links">
+          <a href="https://slab-webcmd-vssut.vercel.app" target="_blank" class="hub-link-btn">
+            &#x1F310; Open Webcmd Cloud Dashboard
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="modal hidden">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h4>Agent Configuration & MCP</h4>
+          <button id="btnCloseSettings" class="btn-close">&times;</button>
+        </div>
+        
+        <div class="settings-form">
+          <label>
+            <span>Supabase / Chat Edge Function URL</span>
+            <input type="text" id="cfgApiEndpoint" placeholder="https://kkiqgaxtfeswzfmqixfm.supabase.co/functions/v1/chat">
+          </label>
+
+          <label>
+            <span>MCP Protocol Server Endpoint</span>
+            <input type="text" id="cfgMcpEndpoint" placeholder="https://kkiqgaxtfeswzfmqixfm.supabase.co/functions/v1/mcp">
+          </label>
+
+          <label>
+            <span>Supabase Anon / Bearer Key (Optional)</span>
+            <input type="password" id="cfgSupabaseKey" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...">
+          </label>
+
+          <div class="slider-group">
+            <label>Voice Speed: <span id="valRate">1.0x</span></label>
+            <input type="range" id="cfgSpeechRate" min="0.7" max="1.5" step="0.1" value="1.0">
+          </div>
+
+          <div class="settings-toggles">
+            <label><input type="checkbox" id="cfgAutoSendVoice" checked> Auto-send message when you stop speaking</label>
+            <label><input type="checkbox" id="cfgAutoSpeak" checked> Auto-speak agent response</label>
+          </div>
+
+          <div class="modal-buttons">
+            <button id="btnResetSettings" class="btn-secondary-sm">Reset Defaults</button>
+            <button id="btnSaveSettings" class="btn-primary-sm">Save Changes</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

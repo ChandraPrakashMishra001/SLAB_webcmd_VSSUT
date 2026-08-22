@@ -28,6 +28,8 @@ sitemaps/
 *.pem
 *.crx
 *.zip
+!public/slab-agent-extension.zip
+!slab-agent-extension.zip
 .envrc
 .windsurf
 .claude

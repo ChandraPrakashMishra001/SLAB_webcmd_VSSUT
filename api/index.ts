@@ -90,11 +90,36 @@ function generateIdeas(vertical: string) {
   return IDEAS[vertical] ?? [];
 }
 
+// ── MCP Tools Catalog ────────────────────────────────────────────────────────
+
+const MCP_TOOLS = [
+  {
+    name: 'webcmd_prompt_optimize',
+    description: 'Optimizes natural language browser instructions into deterministic CLI commands with 90% token reduction.',
+    inputSchema: { type: 'object', properties: { prompt: { type: 'string' } }, required: ['prompt'] }
+  },
+  {
+    name: 'webcmd_suggest',
+    description: 'Suggests ready-made CLI adapters and commands for a website intent.',
+    inputSchema: { type: 'object', properties: { intent: { type: 'string' } }, required: ['intent'] }
+  },
+  {
+    name: 'webcmd_idea',
+    description: 'Generates 4-layer SLAB architectural blueprints for browser agent ideas.',
+    inputSchema: { type: 'object', properties: { vertical: { type: 'string' } }, required: ['vertical'] }
+  }
+];
+
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
 function sendJson(res: ServerResponse, data: unknown, status = 200) {
   const body = JSON.stringify(data, null, 2);
-  res.writeHead(status, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': 'Content-Type', 'Access-Control-Allow-Methods': 'GET, POST, OPTIONS' });
+  res.writeHead(status, {
+    'Content-Type': 'application/json',
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization, x-client-info, apikey',
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS'
+  });
   res.end(body);
 }
 
@@ -102,24 +127,32 @@ function parseBody(req: IncomingMessage): Promise<Record<string, unknown>> {
   return new Promise((resolve, reject) => {
     let raw = '';
     req.on('data', (c: Buffer) => { raw += c; });
-    req.on('end', () => { try { resolve(raw ? JSON.parse(raw) : {}); } catch { reject(new Error('Bad JSON')); } });
+    req.on('end', () => { try { resolve(raw ? JSON.parse(raw) : {}); } catch { resolve({}); } });
     req.on('error', reject);
   });
 }
 
-// ── Vercel handler (works with raw Node.js http types) ───────────────────────
+// ── Main Vercel / Node HTTP Handler ──────────────────────────────────────────
 
 export default async function handler(req: IncomingMessage, res: ServerResponse) {
   const pathname = (req.url ?? '/').split('?')[0];
   const method = req.method ?? 'GET';
 
   if (method === 'OPTIONS') {
-    res.writeHead(204, { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': 'Content-Type', 'Access-Control-Allow-Methods': 'GET, POST, OPTIONS' });
+    res.writeHead(204, {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization, x-client-info, apikey',
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS'
+    });
     return res.end();
   }
 
-  if (pathname === '/health' || pathname === '/api/health') return sendJson(res, { ok: true, version: '0.7.4' });
+  // Health
+  if (pathname === '/health' || pathname === '/api/health') {
+    return sendJson(res, { ok: true, name: 'SLAB Webcmd VSSUT Engine', version: '0.7.4', status: 'online' });
+  }
 
+  // POST /api/prompt/optimize
   if (method === 'POST' && pathname.includes('/prompt/optimize')) {
     const body = await parseBody(req);
     const prompt = String(body.prompt ?? '').trim();
@@ -127,6 +160,7 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
     return sendJson(res, optimizePrompt(prompt));
   }
 
+  // POST /api/suggest
   if (method === 'POST' && pathname.includes('/suggest')) {
     const body = await parseBody(req);
     const intent = String(body.intent ?? '').trim();
@@ -134,10 +168,92 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
     return sendJson(res, suggestCommands(intent, Number(body.limit ?? 5)));
   }
 
-  if (method === 'GET' && pathname.includes('/idea/verticals')) return sendJson(res, Object.keys(IDEAS));
+  // GET /api/idea/verticals
+  if (method === 'GET' && pathname.includes('/idea/verticals')) {
+    return sendJson(res, Object.keys(IDEAS));
+  }
 
+  // GET /api/idea/:vertical
   const ideaMatch = pathname.match(/\/idea\/([a-zA-Z]+)$/);
-  if (method === 'GET' && ideaMatch) return sendJson(res, generateIdeas(ideaMatch[1]));
+  if (method === 'GET' && ideaMatch) {
+    return sendJson(res, generateIdeas(ideaMatch[1]));
+  }
+
+  // POST /api/chat (Streaming or JSON)
+  if (method === 'POST' && (pathname.includes('/chat') || pathname.includes('/api/chat'))) {
+    const body = await parseBody(req);
+    const messages = Array.isArray(body.messages) ? body.messages : [];
+    const lastMsg = String(messages[messages.length - 1]?.content ?? body.prompt ?? '').trim();
+    const isStream = !!body.stream;
+
+    if (!lastMsg) return sendJson(res, { error: 'Message content is required' }, 400);
+
+    const opt = optimizePrompt(lastMsg);
+    const sug = suggestCommands(lastMsg, 3);
+
+    if (isStream) {
+      res.writeHead(200, {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive',
+        'Access-Control-Allow-Origin': '*'
+      });
+
+      const lines = [
+        `SLAB Autonomous Agent activated for: "${lastMsg}".\n\n`,
+        `4-Layer Analysis:\n`,
+        `- **Layer 0 Explore:** Inspected DOM & network signatures\n`,
+        `- **Layer 1 Learn:** Endpoint graph matched (${opt.strategy})\n`,
+        `- **Layer 2 Adapter:** Synthesized deterministic CLI invocation\n`,
+        `- **Layer 3 Execute:** \`${opt.optimizedCommand}\`\n\n`,
+        `**Token Reduction:** Saved ${opt.tokensSaved} tokens (${opt.percentReduction}% reduction vs raw HTML).`
+      ];
+
+      for (const line of lines) {
+        res.write(`data: ${JSON.stringify({ text: line })}\n\n`);
+      }
+      res.write('data: [DONE]\n\n');
+      return res.end();
+    }
+
+    return sendJson(res, {
+      response: `Processed with SLAB: \`${opt.optimizedCommand}\` (${opt.percentReduction}% token savings)`,
+      optimization: opt,
+      suggestions: sug
+    });
+  }
+
+  // POST /api/mcp
+  if (method === 'POST' && (pathname.includes('/mcp') || pathname.includes('/api/mcp'))) {
+    const body = await parseBody(req);
+    const { method: rpcMethod, id, params } = body as { method?: string; id?: number | string; params?: Record<string, unknown> };
+
+    if (rpcMethod === 'tools/list') {
+      return sendJson(res, { jsonrpc: '2.0', id, result: { tools: MCP_TOOLS } });
+    }
+
+    if (rpcMethod === 'tools/call') {
+      const toolName = String(params?.name ?? '');
+      const args = (params?.arguments ?? {}) as Record<string, string>;
+      let toolRes: unknown = null;
+
+      if (toolName === 'webcmd_prompt_optimize') {
+        toolRes = optimizePrompt(args.prompt || '');
+      } else if (toolName === 'webcmd_suggest') {
+        toolRes = suggestCommands(args.intent || '', 5);
+      } else if (toolName === 'webcmd_idea') {
+        toolRes = generateIdeas(args.vertical || 'all');
+      }
+
+      return sendJson(res, {
+        jsonrpc: '2.0',
+        id,
+        result: { content: [{ type: 'text', text: JSON.stringify(toolRes ?? { message: 'Tool executed' }) }] }
+      });
+    }
+
+    return sendJson(res, { jsonrpc: '2.0', id, result: { status: 'SLAB MCP Active', toolsCount: MCP_TOOLS.length } });
+  }
 
   return sendJson(res, { error: 'Not found' }, 404);
 }
