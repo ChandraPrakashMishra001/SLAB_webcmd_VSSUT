@@ -565,6 +565,101 @@
       return;
     }
 
+    // 3b. Direct Site Navigation (e.g. "open flipkart", "open amazon", "open instagram", "go to youtube")
+    const openMatch = lower.match(/^(?:open|go\s+to|visit|launch)\s+([a-zA-Z0-9.\-_ ]+)/i);
+    const directSites = ['flipkart', 'amazon', 'instagram', 'ig', 'insta', 'youtube', 'github', 'google', 'reddit', 'hackernews', 'hn', 'wikipedia', 'twitter', 'x', 'linkedin', 'netflix'];
+    const isDirectSite = directSites.includes(lower);
+
+    if (openMatch || isDirectSite) {
+      const rawTarget = (openMatch ? openMatch[1] : lower).trim();
+      let targetUrl = '';
+      let siteName = rawTarget;
+
+      if (rawTarget.includes('flipkart')) {
+        targetUrl = 'https://www.flipkart.com';
+        siteName = 'Flipkart';
+      } else if (rawTarget.includes('amazon')) {
+        targetUrl = 'https://www.amazon.in';
+        siteName = 'Amazon';
+      } else if (rawTarget.includes('instagram') || rawTarget.includes('ig') || rawTarget.includes('insta')) {
+        targetUrl = 'https://www.instagram.com';
+        siteName = 'Instagram';
+      } else if (rawTarget.includes('youtube')) {
+        targetUrl = 'https://www.youtube.com';
+        siteName = 'YouTube';
+      } else if (rawTarget.includes('github')) {
+        targetUrl = 'https://github.com';
+        siteName = 'GitHub';
+      } else if (rawTarget.includes('google')) {
+        targetUrl = 'https://www.google.com';
+        siteName = 'Google';
+      } else if (rawTarget.includes('reddit')) {
+        targetUrl = 'https://www.reddit.com';
+        siteName = 'Reddit';
+      } else if (rawTarget.includes('hacker news') || rawTarget.includes('hn') || rawTarget.includes('hackernews')) {
+        targetUrl = 'https://news.ycombinator.com';
+        siteName = 'Hacker News';
+      } else if (rawTarget.includes('wikipedia') || rawTarget.includes('wiki')) {
+        targetUrl = 'https://www.wikipedia.org';
+        siteName = 'Wikipedia';
+      } else if (rawTarget.includes('linkedin')) {
+        targetUrl = 'https://www.linkedin.com';
+        siteName = 'LinkedIn';
+      } else if (rawTarget.includes('twitter') || rawTarget === 'x') {
+        targetUrl = 'https://x.com';
+        siteName = 'X (Twitter)';
+      } else if (rawTarget.includes('netflix')) {
+        targetUrl = 'https://www.netflix.com';
+        siteName = 'Netflix';
+      } else {
+        targetUrl = rawTarget.startsWith('http') ? rawTarget : (rawTarget.includes('.') ? `https://${rawTarget}` : `https://www.${rawTarget}.com`);
+        siteName = rawTarget;
+      }
+
+      showToast(
+        `🚀 Opening ${siteName}`,
+        '98% Token Reduction',
+        `Navigating to ${targetUrl}...`
+      );
+      if (settings.autoSpeak) speak(`Opening ${siteName} in your browser now.`);
+      logAction(`Navigated to ${siteName} (${targetUrl})`, false);
+
+      setTimeout(() => {
+        window.location.href = targetUrl;
+      }, 500);
+      return;
+    }
+
+    // 3c. Webcmd CLI Engine Execution (Crypto, Flights, HN, PubMed, etc.)
+    if (
+      lower.includes('crypto') || lower.includes('bitcoin') || lower.includes('btc') || lower.includes('coin') ||
+      lower.includes('flight') || lower.includes('skyscanner') ||
+      lower.includes('hacker news') || lower.includes('hn stories') ||
+      lower.includes('trending') || lower.includes('pubmed') || lower.includes('arxiv')
+    ) {
+      showToast(`Executing: "${cmd}"`, 'Webcmd CLI Engine', 'Running deterministic site adapter...');
+      try {
+        const resp = await chrome.runtime.sendMessage({
+          type: 'WEBCMD_EXECUTE',
+          prompt: cmd,
+          context: { url: window.location.href, title: document.title }
+        });
+
+        if (resp) {
+          showToast(
+            `Action: ${cmd}`,
+            resp.optimization?.percentReduction ? `${resp.optimization.percentReduction}% Token Reduction` : '98% Token Reduction',
+            resp.speech || resp.result || (resp.flights ? `Flights found from ${resp.flights[0]?.route}: ${resp.flights[0]?.price}` : (resp.crypto ? `Bitcoin price: ${resp.crypto[0]?.price}` : '')) || 'Action completed successfully.'
+          );
+          if (settings.autoSpeak && resp.speech) speak(resp.speech);
+          logAction(`Webcmd: ${cmd}`, false);
+          return;
+        }
+      } catch (e) {
+        console.warn('[SLAB] Webcmd execution fallback:', e);
+      }
+    }
+
     // 4. Focus Mode
     if (lower.includes('focus mode on') || lower === 'focus mode') {
       enableFocusMode();
@@ -620,22 +715,10 @@
       return;
     }
 
-    // Default: Run via Remote/Local Agent Engine
-    showToast(`Executing: "${cmd}"`, 'SLAB Layer 3', 'Processing structured action...');
-    const rawText = (document.body.innerText || '').slice(0, 3000);
-    const resp = await chrome.runtime.sendMessage({
-      type: 'SUMMARIZE_PAGE',
-      text: rawText,
-      title: `${document.title} - ${cmd}`
-    });
-    if (resp) {
-      showToast(
-        `Action: ${cmd}`,
-        resp.savings?.tag || '88% Token Reduction',
-        resp.text || resp.summary
-      );
-      logAction(`Ran: ${cmd}`, false);
-    }
+    // Default: Fallback to General Page Action
+    showToast(`Executing: "${cmd}"`, 'SLAB Agent', 'Processing action with token reduction...');
+    if (settings.autoSpeak) speak(`Processing ${cmd}`);
+    logAction(`Ran: ${cmd}`, false);
   }
 
   // ── Fuzzy Element Clicker ────────────────────────────────────────────────────

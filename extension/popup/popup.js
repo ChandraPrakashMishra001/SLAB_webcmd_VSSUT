@@ -144,18 +144,22 @@ async function runCommand(command) {
 
   // Fallback background execution
   const lower = command.toLowerCase();
-  if (lower.startsWith('open ') || lower.startsWith('go to ') || lower === 'instagram' || lower === 'ig' || lower === 'youtube') {
+  if (lower.startsWith('open ') || lower.startsWith('go to ') || lower.startsWith('visit ') || ['instagram', 'ig', 'youtube', 'flipkart', 'amazon', 'github', 'reddit', 'hackernews', 'hn'].includes(lower)) {
     let target = 'https://www.google.com';
-    if (lower.includes('instagram') || lower === 'ig') target = 'https://www.instagram.com';
+    if (lower.includes('flipkart')) target = 'https://www.flipkart.com';
+    else if (lower.includes('amazon')) target = 'https://www.amazon.in';
+    else if (lower.includes('instagram') || lower === 'ig' || lower === 'insta') target = 'https://www.instagram.com';
     else if (lower.includes('youtube')) target = 'https://www.youtube.com';
     else if (lower.includes('github')) target = 'https://github.com';
-    else if (lower.includes('amazon')) target = 'https://www.amazon.in';
+    else if (lower.includes('reddit')) target = 'https://www.reddit.com';
+    else if (lower.includes('hacker news') || lower === 'hn') target = 'https://news.ycombinator.com';
     else {
-      const clean = lower.replace(/^(open|go to)\s+/i, '').trim();
-      target = clean.includes('.') ? `https://${clean}` : `https://www.${clean}.com`;
+      const clean = lower.replace(/^(open|go to|visit)\s+/i, '').trim();
+      target = clean.includes('.') ? (clean.startsWith('http') ? clean : `https://${clean}`) : `https://www.${clean}.com`;
     }
     chrome.tabs.create({ url: target });
     appendMessage('agent', `🚀 Opening **${target}** in a new tab.`);
+    return;
   } else {
     appendMessage('agent', `⚡ Processed command: **"${command}"** with 98% token reduction.`);
   }
