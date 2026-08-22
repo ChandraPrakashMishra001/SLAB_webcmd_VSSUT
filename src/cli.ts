@@ -835,6 +835,78 @@ export function createProgram(BUILTIN_CLIS: string, USER_CLIS: string, pluginsDi
       console.log('Update complete.');
     });
 
+  // ── Built-in: prompt (Token Optimization & Prompt Minimization) ───────────
+  const promptCmd = program
+    .command('prompt')
+    .description('Optimize prompts, minimize token consumption, and inspect compact command schemas');
+
+  const promptOptCmd = addOutputFormatOption(
+    promptCmd
+      .command('optimize <prompt...>')
+      .description('Compress a natural language prompt into a deterministic token-minimized Webcmd command'),
+    'json',
+  );
+  promptOptCmd.action(async (promptParts: string[], opts, command) => {
+    const fmt = resolveCommandOutputFormat(command, opts.format);
+    if (fmt === null) return;
+    const { optimizePrompt } = await import('./commands/prompt.js');
+    const result = optimizePrompt(promptParts.join(' '));
+    await renderOutput(result, { fmt, fmtExplicit: outputFormatIsExplicit(command) });
+  });
+
+  const promptSchemaCmd = addOutputFormatOption(
+    promptCmd
+      .command('schema <site> <command>')
+      .description('Generate a token-minimized schema signature for LLM system prompts'),
+    'json',
+  );
+  promptSchemaCmd.action(async (site: string, commandName: string, opts, command) => {
+    const fmt = resolveCommandOutputFormat(command, opts.format);
+    if (fmt === null) return;
+    const { generateCompactSchema } = await import('./commands/prompt.js');
+    const result = generateCompactSchema(site, commandName);
+    await renderOutput(result, { fmt, fmtExplicit: outputFormatIsExplicit(command) });
+  });
+
+  // ── Built-in: suggest (Auto-Suggestion & Intent Matcher) ───────────────────
+  const suggestCmd = addOutputFormatOption(
+    program
+      .command('suggest <intent...>')
+      .description('Auto-suggest the most relevant Webcmd command or catalog plugin for a goal')
+      .option('--limit <number>', 'Maximum suggestions to return', '5'),
+    'json',
+  );
+  suggestCmd.action(async (intentParts: string[], opts, command) => {
+    const fmt = resolveCommandOutputFormat(command, opts.format);
+    if (fmt === null) return;
+    const { suggestCommands } = await import('./commands/suggest.js');
+    const limit = parsePositiveIntOption(opts.limit, '--limit', 5);
+    const result = suggestCommands(intentParts.join(' '), { limit, packageRoot: findPackageRoot(CLI_FILE) });
+    await renderOutput(result, { fmt, fmtExplicit: outputFormatIsExplicit(command) });
+  });
+
+  // ── Built-in: idea (Browser Agent Idea Generator & SLAB Brainstormer) ───────
+  const ideaCmd = addOutputFormatOption(
+    program
+      .command('idea [vertical]')
+      .description('Generate browser agent ideas with 4-layer SLAB architectural blueprints')
+      .option('--count <number>', 'Number of ideas to generate')
+      .option('--verticals', 'List all available vertical categories', false),
+    'json',
+  );
+  ideaCmd.action(async (vertical: string | undefined, opts, command) => {
+    const fmt = resolveCommandOutputFormat(command, opts.format);
+    if (fmt === null) return;
+    const { generateIdeas, listIdeaVerticals } = await import('./commands/idea.js');
+    if (opts.verticals) {
+      await renderOutput(listIdeaVerticals(), { fmt, fmtExplicit: outputFormatIsExplicit(command) });
+      return;
+    }
+    const count = opts.count ? parsePositiveIntOption(opts.count, '--count', 10) : undefined;
+    const result = generateIdeas(vertical || 'all', count);
+    await renderOutput(result, { fmt, fmtExplicit: outputFormatIsExplicit(command) });
+  });
+
   const authCmd = registerAuthCommands(program);
 
   const conventionAuditCmd = program
@@ -2175,6 +2247,7 @@ cli({
   installCommanderNamespaceStructuredHelp(pluginCmd, { globalCommand: program, description: originalPluginDescription });
   installCommanderNamespaceStructuredHelp(adapterCmd, { globalCommand: program, description: originalAdapterDescription });
   installCommanderNamespaceStructuredHelp(profileCmd, { globalCommand: program, description: originalProfileDescription });
+  installCommanderNamespaceStructuredHelp(promptCmd, { globalCommand: program, description: 'Optimize prompts, minimize token consumption, and inspect compact schemas' });
   program.configureHelp({
     visibleCommands: (command) => command.commands.filter(child => command !== program || !adapterNameSet.has(child.name())),
   });

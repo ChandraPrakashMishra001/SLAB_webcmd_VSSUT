@@ -47,7 +47,7 @@ interface SkillFrontmatter {
   version?: unknown;
 }
 
-type SkillProvider = 'agents' | 'codex' | 'claude';
+type SkillProvider = 'agents' | 'codex' | 'claude' | 'antigravity';
 type SkillScope = 'user' | 'project';
 
 export function getSkillsRoot(packageRoot: string = findPackageRoot(MODULE_FILE)): string {
@@ -98,7 +98,7 @@ export function removeWebcmdSkills(options: WebcmdSkillOptions = {}): WebcmdSkil
   const homeDir = options.homeDir ?? os.homedir();
   const cwd = options.cwd ?? process.cwd();
   const roots = new Set([
-    ...['.agents', '.codex', '.claude'].flatMap((dir) => [
+    ...['.agents', '.codex', '.claude', '.gemini/antigravity', '.antigravity'].flatMap((dir) => [
       path.join(homeDir, dir, 'skills'),
       path.join(cwd, dir, 'skills'),
     ]),
@@ -142,7 +142,13 @@ function updateStableSkillLinks(options: WebcmdSkillOptions): WebcmdSkillLink[] 
 function destinationFor(name: string, provider: SkillProvider | undefined, scope: SkillScope, options: WebcmdSkillOptions): string {
   if (options.customPath !== undefined) return path.join(expandHomePath(options.customPath), name);
   const base = scope === 'project' ? options.cwd ?? process.cwd() : options.homeDir ?? os.homedir();
-  const agentDir = provider === 'claude' ? '.claude' : provider === 'codex' ? '.codex' : '.agents';
+  const agentDir = provider === 'claude'
+    ? '.claude'
+    : provider === 'codex'
+      ? '.codex'
+      : provider === 'antigravity'
+        ? (scope === 'project' ? '.antigravity' : path.join('.gemini', 'antigravity'))
+        : '.agents';
   return path.join(base, agentDir, 'skills', name);
 }
 
@@ -156,7 +162,8 @@ function normalizeProvider(raw = 'agents'): SkillProvider {
   const value = raw.trim().toLowerCase();
   if (value === 'agents' || value === 'codex') return value;
   if (value === 'claude' || value === 'claude-code' || value === 'claude_code') return 'claude';
-  throw new ArgumentError(`Unsupported skill provider: ${raw}`, 'Use one of: agents, codex, claude.');
+  if (value === 'antigravity' || value === 'gemini' || value === 'agy') return 'antigravity';
+  throw new ArgumentError(`Unsupported skill provider: ${raw}`, 'Use one of: agents, codex, claude, antigravity.');
 }
 
 function normalizeScope(raw = 'user'): SkillScope {

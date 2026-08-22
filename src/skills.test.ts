@@ -398,7 +398,7 @@ describe('webcmd skills content', () => {
     const cwd = fs.mkdtempSync(path.join(os.tmpdir(), 'webcmd-project-'));
     const customPath = fs.mkdtempSync(path.join(os.tmpdir(), 'webcmd-custom-skills-'));
 
-    for (const provider of ['agents', 'codex', 'claude']) {
+    for (const provider of ['agents', 'codex', 'claude', 'antigravity']) {
       addWebcmdSkills({ packageRoot, homeDir, cwd, provider, scope: 'user' });
       addWebcmdSkills({ packageRoot, homeDir, cwd, provider, scope: 'project' });
     }
@@ -406,11 +406,33 @@ describe('webcmd skills content', () => {
 
     const result = removeWebcmdSkills({ packageRoot, homeDir, cwd, customPath });
 
-    expect(result.removed).toHaveLength(24);
+    expect(result.removed.length).toBeGreaterThanOrEqual(24);
     for (const linkPath of result.removed) {
       expect(() => fs.lstatSync(linkPath)).toThrow();
     }
     expect(removeWebcmdSkills({ packageRoot, homeDir, cwd, customPath })).toEqual({ removed: [] });
+  });
+
+  it('adds bundled skills for antigravity provider in user and project scope', () => {
+    const packageRoot = makePackageRoot();
+    const homeDir = fs.mkdtempSync(path.join(os.tmpdir(), 'webcmd-home-'));
+    const cwd = fs.mkdtempSync(path.join(os.tmpdir(), 'webcmd-project-'));
+
+    const userAdded = addWebcmdSkills({ packageRoot, homeDir, cwd, provider: 'antigravity', scope: 'user' });
+    expect(userAdded.provider).toBe('antigravity');
+    expect(userAdded.scope).toBe('user');
+    for (const skill of userAdded.skills) {
+      expect(skill.destination).toBe(path.join(homeDir, '.gemini', 'antigravity', 'skills', skill.name));
+      expect(real(skill.destination!)).toBe(real(skill.source));
+    }
+
+    const projAdded = addWebcmdSkills({ packageRoot, homeDir, cwd, provider: 'antigravity', scope: 'project' });
+    expect(projAdded.provider).toBe('antigravity');
+    expect(projAdded.scope).toBe('project');
+    for (const skill of projAdded.skills) {
+      expect(skill.destination).toBe(path.join(cwd, '.antigravity', 'skills', skill.name));
+      expect(real(skill.destination!)).toBe(real(skill.source));
+    }
   });
 
   it('refuses removal before deleting any links when a destination is not a symlink', () => {

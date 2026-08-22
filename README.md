@@ -129,11 +129,10 @@ agent to search and install the relevant plugin when a site is not installed.
 
 Webcmd Cloud can run supported commands and browser sessions on hosted infrastructure. It is in active development and is not yet stable.
 
-- [Prompt Cookbook](https://webcmd.dev/docs/agent-prompts)
+- 📖 **[Complete Agent & Hackathon Guide](docs/GUIDE.md)** — everything in one place: setup, SLAB architecture, Antigravity, prompt optimization, auto-suggestion, idea generation, browser recipes, and judging rubric.
 - [How Webcmd Works](https://webcmd.dev/docs/concepts)
 - [Local or Cloud](https://webcmd.dev/docs/local-or-cloud)
 - [Publish a Community Plugin](https://webcmd.dev/docs/publish-community-plugin)
-- [X → CLI](https://webcmd.dev/docs/x-session-cli)
 - [Command Surface](https://webcmd.dev/docs/cli-reference)
 
 ## Community
