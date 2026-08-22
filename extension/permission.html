@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SLAB Voice Agent — Microphone Permission</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #020617;
+      color: #f8fafc;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+    .card {
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 30px rgba(56, 189, 248, 0.2);
+      border-radius: 24px;
+      padding: 40px;
+      max-width: 480px;
+      text-align: center;
+      backdrop-filter: blur(20px);
+    }
+    .icon {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: rgba(56, 189, 248, 0.1);
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 24px;
+      font-size: 32px;
+      box-shadow: 0 0 25px rgba(56, 189, 248, 0.3);
+    }
+    h1 {
+      font-size: 24px;
+      font-weight: 800;
+      margin: 0 0 12px;
+      background: linear-gradient(135deg, #38bdf8, #818cf8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    p {
+      color: #94a3b8;
+      font-size: 14px;
+      line-height: 1.6;
+      margin: 0 0 28px;
+    }
+    .btn {
+      background: linear-gradient(135deg, #0284c7, #2563eb);
+      color: #ffffff;
+      border: none;
+      padding: 14px 28px;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 4px 20px rgba(37, 99, 235, 0.4);
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 25px rgba(56, 189, 248, 0.6);
+    }
+    .status {
+      margin-top: 20px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .status.success {
+      color: #34d399;
+    }
+    .status.error {
+      color: #f87171;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="icon">🎙️</div>
+    <h1>Enable Voice Navigation</h1>
+    <p>
+      Chrome requires one-time permission to allow SLAB AI Agent to access your microphone for hands-free voice browsing.
+    </p>
+    <button class="btn" id="btnAllow">
+      <span>Allow Microphone Access</span>
+    </button>
+    <div class="status" id="statusMsg"></div>
+  </div>
+
+  <script>
+    document.getElementById('btnAllow').addEventListener('click', async () => {
+      const status = document.getElementById('statusMsg');
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        // Stop the tracks immediately after obtaining permission
+        stream.getTracks().forEach(track => track.stop());
+        status.className = 'status success';
+        status.textContent = '✅ Microphone permission granted! Closing this tab in 2 seconds...';
+        setTimeout(() => {
+          window.close();
+        }, 2000);
+      } catch (err) {
+        status.className = 'status error';
+        status.textContent = '❌ Access denied: ' + err.message + '. Please allow mic access in your browser settings.';
+      }
+    });
+  </script>
+</body>
+</html>

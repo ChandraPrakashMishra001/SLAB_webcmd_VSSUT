@@ -157,7 +157,8 @@ function initVoiceEngine() {
   const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (!SpeechRec) {
     console.warn('[SLAB] SpeechRecognition not supported in this browser.');
-    document.getElementById('btnVoiceToggle').title = 'Voice recognition not supported';
+    const btn = document.getElementById('btnVoiceToggle');
+    if (btn) btn.title = 'Voice recognition not supported';
     return;
   }
 
@@ -185,7 +186,8 @@ function initVoiceEngine() {
     }
 
     const transcript = final || interim;
-    document.getElementById('voiceLiveTranscript').textContent = transcript || 'Listening...';
+    const transEl = document.getElementById('voiceLiveTranscript');
+    if (transEl) transEl.textContent = transcript || 'Listening...';
     if (transcript) {
       document.getElementById('txtPrompt').value = transcript;
     }
@@ -202,6 +204,18 @@ function initVoiceEngine() {
   recognition.onerror = (event) => {
     console.warn('[SLAB] Voice error:', event.error);
     stopVoiceRecognition();
+
+    if (event.error === 'not-allowed' || event.error === 'audio-capture') {
+      appendSystemMessage('🎙️ Microphone access required. Opening permission tab...');
+      if (chrome.tabs && chrome.runtime) {
+        chrome.tabs.create({ url: chrome.runtime.getURL('permission.html') });
+      }
+    } else if (event.error === 'no-speech') {
+      const transEl = document.getElementById('voiceLiveTranscript');
+      if (transEl) transEl.textContent = 'Tap mic to speak';
+    } else if (event.error === 'network') {
+      appendSystemMessage('⚠️ Voice network error. Please check your internet connection.');
+    }
   };
 
   recognition.onend = () => {
@@ -210,25 +224,60 @@ function initVoiceEngine() {
   };
 }
 
-function toggleVoiceRecognition() {
-  if (!recognition) {
-    alert('Speech Recognition is not supported or permission was denied.');
-    return;
-  }
+async function toggleVoiceRecognition() {
   if (isRecording) {
     stopVoiceRecognition();
-  } else {
+    return;
+  }
+
+  const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRec) {
+    alert('Speech Recognition is not supported in this browser.');
+    return;
+  }
+
+  // Pre-flight microphone permission check
+  try {
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      stream.getTracks().forEach(track => track.stop());
+    }
+  } catch (err) {
+    console.warn('[SLAB] Microphone permission required:', err);
+    if (chrome.tabs && chrome.runtime) {
+      chrome.tabs.create({ url: chrome.runtime.getURL('permission.html') });
+    }
+    return;
+  }
+
+  if (!recognition) {
+    initVoiceEngine();
+  }
+
+  if (recognition) {
     try {
       recognition.start();
     } catch (e) {
       console.warn('[SLAB] Recognition start error:', e);
+      try {
+        recognition.abort();
+        setTimeout(() => {
+          try { recognition.start(); } catch (err) { console.warn(err); }
+        }, 150);
+      } catch (retryErr) {
+        console.error('[SLAB] Voice retry error:', retryErr);
+      }
     }
   }
 }
 
 function stopVoiceRecognition() {
   if (recognition && isRecording) {
-    recognition.stop();
+    try {
+      recognition.stop();
+    } catch (e) {
+      console.warn(e);
+    }
   }
   isRecording = false;
   updateVoiceUI(false);
