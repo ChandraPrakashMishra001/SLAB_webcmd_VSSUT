@@ -1,4 +1,6 @@
 import type { IncomingMessage, ServerResponse } from 'http';
+import fs from 'fs';
+import path from 'path';
 
 // ── Site Keyword Map ──────────────────────────────────────────────────────────
 
@@ -269,6 +271,30 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
   // Health
   if (pathname === '/health' || pathname === '/api/health') {
     return sendJson(res, { ok: true, name: 'SLAB Webcmd VSSUT Engine', version: '0.7.4', status: 'online' });
+  }
+
+  // Extension ZIP Download
+  if (pathname === '/slab-agent-extension.zip' || pathname === '/api/download-extension' || pathname === '/public/slab-agent-extension.zip') {
+    const candidatePaths = [
+      path.join(process.cwd(), 'slab-agent-extension.zip'),
+      path.join(process.cwd(), 'public', 'slab-agent-extension.zip'),
+      path.join(__dirname, '..', 'slab-agent-extension.zip'),
+      path.join(__dirname, '..', 'public', 'slab-agent-extension.zip')
+    ];
+
+    for (const p of candidatePaths) {
+      if (fs.existsSync(p)) {
+        const fileData = fs.readFileSync(p);
+        res.writeHead(200, {
+          'Content-Type': 'application/zip',
+          'Content-Disposition': 'attachment; filename="slab-agent-extension.zip"',
+          'Content-Length': fileData.length,
+          'Access-Control-Allow-Origin': '*',
+          'Cache-Control': 'public, max-age=3600'
+        });
+        return res.end(fileData);
+      }
+    }
   }
 
   // POST /api/execute (Smart Browser Agent Action Execution)
