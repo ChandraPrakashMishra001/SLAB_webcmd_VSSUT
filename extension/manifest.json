@@ -46,7 +46,11 @@
     {
       "resources": [
         "onboarding/onboarding.html",
+        "onboarding/onboarding.css",
+        "onboarding/onboarding.js",
         "options/options.html",
+        "options/options.css",
+        "options/options.js",
         "permission.html",
         "permission.js",
         "lib/webgazer.js"
