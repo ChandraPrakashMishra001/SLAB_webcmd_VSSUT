@@ -10,11 +10,6 @@
 name: Reconcile hosted plugin catalog
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'plugins/**'
-      - 'webcmd-plugin.json'
   workflow_dispatch:
     # Note: manual runs should be triggered against main to ensure github.sha
     # points to the current tip. Reconciling an older ref would delist plugins

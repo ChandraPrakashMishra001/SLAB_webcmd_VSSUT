@@ -1,14 +1,6 @@
 name: Sync community plugins
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'plugins/*/webcmd-plugin.json'
-      - 'plugin-catalog.json'
-      - 'src/community-plugin-sync.ts'
-      - 'scripts/sync-community-plugins.ts'
-      - 'package.json'
   workflow_dispatch:
 
 permissions:

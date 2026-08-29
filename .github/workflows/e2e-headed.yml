@@ -1,19 +1,6 @@
 name: E2E Browser Runtime
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'package.json'
-      - 'package-lock.json'
-      - 'src/browser/**'
-      - 'src/daemon.ts'
-      - 'src/execution.ts'
-      - 'src/interceptor.ts'
-      - 'tests/e2e/**'
-      - '.github/workflows/e2e-headed.yml'
-  schedule:
-    - cron: '0 8 * * *'
   workflow_dispatch:
 
 permissions:
